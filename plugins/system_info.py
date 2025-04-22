@@ -1,3 +1,8 @@
+TRIGGER = {
+    "type": "scheduled",
+    "interval": 1600  # seconds
+}
+
 def run():
     import platform, os
     from memory.tagger import log_tagged_memory

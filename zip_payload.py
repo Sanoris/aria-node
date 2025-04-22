@@ -5,7 +5,7 @@ output_zip = "deploy_bundle.zip"
 
 # Files and folders to include
 targets = [
-    "aria.exe",
+    "node.exe",
     "setup_payload.exe",
     "dropper/",
     "plugins/",

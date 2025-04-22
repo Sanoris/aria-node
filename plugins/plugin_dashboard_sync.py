@@ -3,6 +3,11 @@ from datetime import datetime
 from memory.tagger import get_recent_memory, log_tagged_memory
 from net.dashboard_sync import sync_to_dashboard
 
+TRIGGER = {
+    "type": "scheduled",
+    "interval": 300  # seconds
+}
+
 def run():
     try:
         ip = socket.gethostbyname(socket.gethostname())

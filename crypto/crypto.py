@@ -17,6 +17,9 @@ def load_key_from_file(path=f"{KEYS_DIR}/ARIA_AES_KEY.txt"):
 def generate_keys():
     priv = Ed25519PrivateKey.generate()
     pub = priv.public_key()
+    if os.path.exists(f"{KEYS_DIR}/private.pem"):
+        print("[!] Keys already exist. Skipping generation.")
+        return
     with open(f"{KEYS_DIR}/private.pem", "wb") as f:
         f.write(priv.private_bytes(
             serialization.Encoding.PEM,
@@ -49,7 +52,12 @@ def decrypt_message(key: bytes, ciphertext: bytes) -> bytes:
 
 if __name__ == "__main__":
     generate_keys()
-    priv, pub = load_keys()
+    try:
+        priv, pub = load_keys()
+    except FileNotFoundError:
+        print("[!] Keys not found. Generating...")
+        generate_keys()
+        priv, pub = load_keys()
     print("[+] Keys generated and loaded.")
     # Example usage
     shared_key = os.urandom(32)  # Replace with your actual shared key

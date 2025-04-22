@@ -3,8 +3,7 @@ import threading
 import os
 from memory.decay import decay_memory
 from memory.tagger import log_tagged_memory
-from net.plugin_manager import run_plugins
-from net.plugin_trigger_engine import run_plugins_by_trigger
+from net.plugin_trigger_engine import run_plugins_by_trigger, start_plugins
 from net.secure_peer_client import secure_sync_with_peer
 from net.seed_decider import prioritize
 from net.host_infiltrator import attempt_infiltration
@@ -13,11 +12,6 @@ from net.swarm_merge import merge_peer_logs
 from net.dynamic_leader import elect_leader
 from net.task_splitter import assign_tasks, broadcast_assignments
 from net import aria_server
-
-print("[*] node.py reached")
-with open("boot_debug.txt", "w") as f:
-    f.write("YES\\n")
-
 
 MEMORY_FILE = "memory/log.txt"
 PEER_LOGS = ["memory/log.txt"]  # can be updated to include peer files
@@ -29,9 +23,7 @@ def background_decay():
         time.sleep(3600)
 
 def background_plugins():
-    while True:
-        run_plugins()
-        time.sleep(120)
+    start_plugins()  # Trigger engine handles its own scheduling
 
 def background_sync():
     while True:

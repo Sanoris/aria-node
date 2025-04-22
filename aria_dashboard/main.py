@@ -54,13 +54,17 @@ def get_logs(node: str):
     html += "</ul>"
 
     # plugin trigger form
+    plugin_options = ""
+    for plugin_file in Path("../plugins").glob("plugin_*.py"):
+        plugin_name = plugin_file.stem
+        plugin_options += f'<option value="{plugin_name}">{plugin_name}</option>'
+
     html += f'''
     <form hx-post="/trigger" hx-include="this" class="mt-4">
         <input type="hidden" name="node" value="{node}">
         <label for="plugin" class="block text-sm mb-1">Run plugin:</label>
         <select name="plugin" class="text-black p-1 rounded">
-            <option value="plugin_smb_replicator">plugin_smb_replicator</option>
-            <option value="plugin_sysinfo">plugin_sysinfo</option>
+            {plugin_options}
         </select>
         <input type="hidden" name="action" value="run_now">
         <button type="submit" class="ml-2 border px-2 py-1 hover:bg-green-700">Trigger</button>

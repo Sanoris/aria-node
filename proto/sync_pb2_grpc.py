@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from proto import sync_pb2 as proto_dot_sync__pb2
+import sync_pb2 as sync__pb2
 
 GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
@@ -18,7 +18,7 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in proto/sync_pb2_grpc.py depends on'
+        + f' but the generated code in sync_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
@@ -36,8 +36,8 @@ class AriaPeerStub(object):
         """
         self.SyncMemory = channel.unary_unary(
                 '/AriaPeer/SyncMemory',
-                request_serializer=proto_dot_sync__pb2.MemoryPacket.SerializeToString,
-                response_deserializer=proto_dot_sync__pb2.SyncAck.FromString,
+                request_serializer=sync__pb2.MemoryPacket.SerializeToString,
+                response_deserializer=sync__pb2.SyncAck.FromString,
                 _registered_method=True)
 
 
@@ -55,8 +55,8 @@ def add_AriaPeerServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'SyncMemory': grpc.unary_unary_rpc_method_handler(
                     servicer.SyncMemory,
-                    request_deserializer=proto_dot_sync__pb2.MemoryPacket.FromString,
-                    response_serializer=proto_dot_sync__pb2.SyncAck.SerializeToString,
+                    request_deserializer=sync__pb2.MemoryPacket.FromString,
+                    response_serializer=sync__pb2.SyncAck.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -84,8 +84,8 @@ class AriaPeer(object):
             request,
             target,
             '/AriaPeer/SyncMemory',
-            proto_dot_sync__pb2.MemoryPacket.SerializeToString,
-            proto_dot_sync__pb2.SyncAck.FromString,
+            sync__pb2.MemoryPacket.SerializeToString,
+            sync__pb2.SyncAck.FromString,
             options,
             channel_credentials,
             insecure,
