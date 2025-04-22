@@ -1,0 +1,26 @@
+# 🐍 Python cache & build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 🛠 Nuitka / PyInstaller build outputs
+build/
+dist/
+*.spec
+
+# ⚙️ Virtual environments
+.venv/
+env/
+venv/
+
+# 🔑 Sensitive files
+recon/shodan_key.txt
+*.key
+*.pem
+*.zip
+*.log
+
+# 📝 Misc
+.DS_Store
+Thumbs.db
