@@ -24,3 +24,13 @@ recon/shodan_key.txt
 # 📝 Misc
 .DS_Store
 Thumbs.db
+peers.seed
+priority_targets.json
+seed_log.json
+aria_dashboard/peer_logs.json
+crypto/keys/ARIA_AES_KEY.txt
+memory/log.txt
+memory/peer1.txt
+memory/peer2.txt
+memory/persona.txt
+memory/swarm_manifest.json

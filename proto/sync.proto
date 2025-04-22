@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+service AriaPeer {
+  rpc SyncMemory (MemoryPacket) returns (SyncAck);
+}
+
+message MemoryPacket {
+  string sender_id = 1;
+  bytes encrypted_memory = 2;
+  bytes signature = 3;
+}
+
+message SyncAck {
+  bool success = 1;
+  string message = 2;
+}
