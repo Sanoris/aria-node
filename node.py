@@ -4,7 +4,7 @@ import os
 from memory.decay import decay_memory
 from memory.tagger import log_tagged_memory
 from net.plugin_trigger_engine import run_plugins_by_trigger, start_plugins
-from net.secure_peer_client import secure_sync_with_peer
+from net.peer_client import sync_with_peer
 from net.seed_decider import prioritize
 from net.host_infiltrator import attempt_infiltration
 from net.swarm_vote import swarm_vote, load_peer_logs
@@ -27,7 +27,7 @@ def background_plugins():
 
 def background_sync():
     while True:
-        secure_sync_with_peer(SYNC_PEER)
+        sync_with_peer(SYNC_PEER)
         time.sleep(60)
 
 def background_vote():

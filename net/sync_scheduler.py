@@ -3,7 +3,7 @@ import time
 import yaml
 import json
 import os
-from peer_client import sync_with_peer
+from .peer_client import sync_with_peer
 
 CONFIG_PATH = "config.yaml"
 STATUS_PATH = "peer_status.json"
