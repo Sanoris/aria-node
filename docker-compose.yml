@@ -1,23 +1,37 @@
 version: '3.8'
 services:
-  node1:
+  node:
+    image: aria-node-node:latest
     build: .
-    container_name: aria-node-1
+    container_name: ${NODE_ID}
     volumes:
       - ./plugins:/app/plugins
+      - ./crypto/keys/${NODE_ID}:/app/crypto/keys
+      - ./crypto/keys/ARIA_AES_KEY.txt:/app/crypto/keys/ARIA_AES_KEY.txt
     environment:
-      - NODE_ID=aria-node-001
-      - SYNC_PEER=aria-node-2
+      - NODE_ID=${NODE_ID}
+      - SYNC_PEER=${SYNC_PEER}
+  dashboard:
+    build: .
+    container_name: aria-dashboard
+    volumes:
+      - ./aria_dashboard:/app/aria_dashboard
+      - ./plugins:/app/plugins
+      - ./crypto/keys:/app/crypto/keys
+    environment:
+      - NODE_ID=aria-dashboard
     ports:
-      - "50051:50051"
+      - "8000:8000"
+    command: uvicorn aria_dashboard.main:app --host 0.0.0.0 --port 8000
 
-  node2:
-    build: .
-    container_name: aria-node-2
-    volumes:
-      - ./plugins:/app/plugins
-    environment:
-      - NODE_ID=aria-node-002
-      - SYNC_PEER=aria-node-1
-    ports:
-      - "50052:50051"
+
+
+  #$SYNC_PEER=172.168.0.3
+# docker run --hostname=02b2babfa355 --env=NODE_ID=aria-node-3 --env=SYNC_PEER=127.0.0.1 --env=PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --env=LANG
+# =C.UTF-8 --env=GPG_KEY=A035C8C19219BA821ECEA86B64E628F8D684696D --env=PYTHON_VERSION=3.10.17 --env=PYTHON_SHA256=4c68050f049d1b4ac5aadd0df5f27941c0350d2a9e7ab0907ee5eb5225d9d6b0 --volume=C:\Users\matth\D
+# ocuments\aria-node\plugins:/app/plugins:rw --volume=C:\Users\matth\Documents\aria-node\crypto\keys\aria-node-2:/app/crypto/keys:rw --volume=C:\Users\matth\Documents\aria-node\crypto\keys\ARIA_AES_KEY.txt
+# :/app/crypto/keys/ARIA_AES_KEY.txt:rw --network=aria-node_default --workdir=/app --restart=no --label='com.docker.compose.config-hash=32b8930e74d5f512d213adbd16ff84799ce6266af71d8dfeb038f443e3cd1873' --l
+# abel='com.docker.compose.container-number=2' --label='com.docker.compose.depends_on=' --label='com.docker.compose.image=sha256:6306a863361e95428811aa39194b8b9e0adca2ce43b0a0d1b3d762404160c42d' --label='c
+# om.docker.compose.oneoff=False' --label='com.docker.compose.project=aria-node' --label='com.docker.compose.project.config_files=C:\Users\matth\Documents\aria-node\docker-compose.yml' --label='com.docker.
+# compose.project.environment_file=C:\Users\matth\Documents\aria-node\.env.3' --label='com.docker.compose.project.working_dir=C:\Users\matth\Documents\aria-node' --label='com.docker.compose.replace=033ac69
+# 4df6d37c3db51b3ffc9717d7b15e8361c6e5f792e69ad818973b223e6' --label='com.docker.compose.service=node' --label='com.docker.compose.version=2.34.0' --runtime=runc -d aria-node-node:latest

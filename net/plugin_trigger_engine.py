@@ -53,9 +53,10 @@ def start_plugins():
     plugins = load_plugins()
     for plugin in plugins:
         trigger = getattr(plugin, "TRIGGER", {})
-        ttype = trigger.get("type")
+        ttype = trigger.get("type", None)
+        interval = trigger.get("interval", 300)
+        event = trigger.get("event", "")
         if ttype == "scheduled":
-            interval = trigger.get("interval", 300)
             t = threading.Thread(target=scheduled_runner, args=(plugin, interval), daemon=True)
             t.start()
             log_tagged_memory(f"Started scheduled plugin {plugin.__name__}", topic="plugin", trust="high")
@@ -66,7 +67,6 @@ def start_plugins():
             except Exception as e:
                 log_tagged_memory(f"Passive plugin {plugin.__name__} error: {e}", topic="plugin", trust="low")
         elif ttype == "event":
-            event = trigger.get("event", "")
             t = threading.Thread(target=event_watcher, args=(plugin, event), daemon=True)
             t.start()
             log_tagged_memory(f"Started event plugin {plugin.__name__} (watching for '{event}')", topic="plugin", trust="high")

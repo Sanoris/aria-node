@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from . import sync_pb2 as sync__pb2
+import sync_pb2 as sync__pb2
 
 GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
@@ -34,15 +34,26 @@ class AriaPeerStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.PerformHandshake = channel.unary_unary(
+                '/AriaPeer/PerformHandshake',
+                request_serializer=sync__pb2.HandshakeRequest.SerializeToString,
+                response_deserializer=sync__pb2.HandshakeResponse.FromString,
+                _registered_method=True)
         self.SyncMemory = channel.unary_unary(
-                '/sync.AriaPeer/SyncMemory',
+                '/AriaPeer/SyncMemory',
                 request_serializer=sync__pb2.SyncMemoryRequest.SerializeToString,
-                response_deserializer=sync__pb2.SyncAck.FromString,
+                response_deserializer=sync__pb2.SyncMemoryResponse.FromString,
                 _registered_method=True)
 
 
 class AriaPeerServicer(object):
     """Missing associated documentation comment in .proto file."""
+
+    def PerformHandshake(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def SyncMemory(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -53,21 +64,53 @@ class AriaPeerServicer(object):
 
 def add_AriaPeerServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'PerformHandshake': grpc.unary_unary_rpc_method_handler(
+                    servicer.PerformHandshake,
+                    request_deserializer=sync__pb2.HandshakeRequest.FromString,
+                    response_serializer=sync__pb2.HandshakeResponse.SerializeToString,
+            ),
             'SyncMemory': grpc.unary_unary_rpc_method_handler(
                     servicer.SyncMemory,
                     request_deserializer=sync__pb2.SyncMemoryRequest.FromString,
-                    response_serializer=sync__pb2.SyncAck.SerializeToString,
+                    response_serializer=sync__pb2.SyncMemoryResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'sync.AriaPeer', rpc_method_handlers)
+            'AriaPeer', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('sync.AriaPeer', rpc_method_handlers)
+    server.add_registered_method_handlers('AriaPeer', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
 class AriaPeer(object):
     """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def PerformHandshake(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/AriaPeer/PerformHandshake',
+            sync__pb2.HandshakeRequest.SerializeToString,
+            sync__pb2.HandshakeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
 
     @staticmethod
     def SyncMemory(request,
@@ -83,9 +126,9 @@ class AriaPeer(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/sync.AriaPeer/SyncMemory',
+            '/AriaPeer/SyncMemory',
             sync__pb2.SyncMemoryRequest.SerializeToString,
-            sync__pb2.SyncAck.FromString,
+            sync__pb2.SyncMemoryResponse.FromString,
             options,
             channel_credentials,
             insecure,

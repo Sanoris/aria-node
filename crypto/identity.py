@@ -38,3 +38,7 @@ def verify_signature(public_key: Ed25519PublicKey, message: bytes, signature: by
         return True
     except Exception:
         return False
+
+# Ensure keys are generated on first load
+if not os.path.exists(f"{KEY_DIR}/private.pem") or not os.path.exists(f"{KEY_DIR}/public.pem"):
+    generate_keypair()

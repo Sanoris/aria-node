@@ -24,17 +24,21 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nsync.proto\x12\x04sync\"\x85\x01\n\x11SyncMemoryRequest\x12\x11\n\tsender_id\x18\x01 \x01(\t\x12\x18\n\x10\x65ncrypted_memory\x18\x02 \x01(\x0c\x12\x11\n\tsignature\x18\x03 \x01(\x0c\x12\x18\n\x10\x63urrent_cycle_id\x18\x04 \x01(\t\x12\x16\n\x0e\x61\x63tive_plugins\x18\x05 \x03(\t\"_\n\x07SyncAck\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12\x15\n\rpeer_cycle_id\x18\x03 \x01(\t\x12\x1b\n\x13peer_active_plugins\x18\x04 \x03(\t2@\n\x08\x41riaPeer\x12\x34\n\nSyncMemory\x12\x17.sync.SyncMemoryRequest\x1a\r.sync.SyncAckb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nsync.proto\"-\n\x10HandshakeRequest\x12\x19\n\x11sender_public_key\x18\x01 \x01(\x0c\",\n\x11HandshakeResponse\x12\x17\n\x0fpeer_public_key\x18\x01 \x01(\x0c\"\x85\x01\n\x11SyncMemoryRequest\x12\x11\n\tsender_id\x18\x01 \x01(\t\x12\x18\n\x10\x65ncrypted_memory\x18\x02 \x01(\x0c\x12\x11\n\tsignature\x18\x03 \x01(\x0c\x12\x18\n\x10\x63urrent_cycle_id\x18\x04 \x01(\t\x12\x16\n\x0e\x61\x63tive_plugins\x18\x05 \x03(\t\"T\n\x12SyncMemoryResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x15\n\rpeer_cycle_id\x18\x02 \x01(\t\x12\x16\n\x0e\x61\x63tive_plugins\x18\x03 \x03(\t2|\n\x08\x41riaPeer\x12\x39\n\x10PerformHandshake\x12\x11.HandshakeRequest\x1a\x12.HandshakeResponse\x12\x35\n\nSyncMemory\x12\x12.SyncMemoryRequest\x1a\x13.SyncMemoryResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'sync_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_SYNCMEMORYREQUEST']._serialized_start=21
-  _globals['_SYNCMEMORYREQUEST']._serialized_end=154
-  _globals['_SYNCACK']._serialized_start=156
-  _globals['_SYNCACK']._serialized_end=251
-  _globals['_ARIAPEER']._serialized_start=253
-  _globals['_ARIAPEER']._serialized_end=317
+  _globals['_HANDSHAKEREQUEST']._serialized_start=14
+  _globals['_HANDSHAKEREQUEST']._serialized_end=59
+  _globals['_HANDSHAKERESPONSE']._serialized_start=61
+  _globals['_HANDSHAKERESPONSE']._serialized_end=105
+  _globals['_SYNCMEMORYREQUEST']._serialized_start=108
+  _globals['_SYNCMEMORYREQUEST']._serialized_end=241
+  _globals['_SYNCMEMORYRESPONSE']._serialized_start=243
+  _globals['_SYNCMEMORYRESPONSE']._serialized_end=327
+  _globals['_ARIAPEER']._serialized_start=329
+  _globals['_ARIAPEER']._serialized_end=453
 # @@protoc_insertion_point(module_scope)

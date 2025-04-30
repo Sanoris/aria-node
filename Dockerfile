@@ -1,7 +1,22 @@
+# Generalized Dockerfile for aria-node-base image
 FROM python:3.10-slim
+
+# Set working directory
 WORKDIR /app
+
+# Copy requirements and install dependencies
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the entire project into the container
 COPY . .
-EXPOSE 50051
+
+# Install libpcap for Scapy
+RUN apt-get update && apt-get install -y libpcap-dev && rm -rf /var/lib/apt/lists/*
+
+# Exclude .pem files from being copied into the image
+RUN find . -name "*.pem" -delete
+
+
+# Set the default command to run the node
 CMD ["python3", "node.py"]

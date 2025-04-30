@@ -27,7 +27,8 @@ def scan_subnet(subnet="192.168.1.0/24", ports=[445, 3389]):
 
 def run():
     # Auto-detect local subnet (placeholder for now)
-    subnet = "192.168.1.0/24"
+    ip = socket.gethostbyname(socket.gethostname())
+    subnet = ip.rsplit('.', 1)[0] + ".0/24"
     hosts = scan_subnet(subnet)
     for ip, ports in hosts:
         port_list = ', '.join(str(p) for p in ports)

@@ -35,3 +35,6 @@ memory/peer2.txt
 memory/persona.txt
 memory/swarm_manifest.json
 host_catalog.json
+.github/
+.env*
+crypto/keys/aria-node*

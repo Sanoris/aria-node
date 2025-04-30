@@ -1,5 +1,29 @@
-node_name: aria-node-001
-peer_list:
-  - 192.168.1.42:50051
-  - 10.0.0.5:50051
-  - 127.0.0.1:50051
+# config.yaml
+
+# Unique node ID
+node_id: aria-node-001
+
+# Peer syncing
+sync_peers:
+  - 10.5.0.2
+  - 10.5.0.3
+
+# Logging settings
+log_file: memory/log.txt
+log_level: INFO
+
+# Plugin controls
+plugin_enabled: true
+plugin_whitelist:
+  - plugin_lan_scanner
+  - plugin_dashboard_sync
+
+# Recon
+common_ports: [22, 80, 443, 50051]
+
+# Crypto
+keys_path: crypto/keys
+
+# Dashboard
+dashboard_host: localhost
+dashboard_port: 8080

@@ -17,7 +17,7 @@ def add_to_catalog(ip, mac):
 
     # Check for duplicates
     for h in hosts:
-        if h["ip"] == ip or h.get("mac") == mac:
+        if h["ip"] == ip or h.get("mac", None) == mac:
             return False  # Device already exists
 
     # Add new device

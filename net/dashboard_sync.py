@@ -1,7 +1,12 @@
-import requests
+import os
 from datetime import datetime
+import requests
 
-DASHBOARD_URL = "http://127.0.0.1:8000/sync"
+def discover_dashboard_url():
+    # Attempt to discover the dashboard URL from environment variables or fallback
+    return os.getenv("DASHBOARD_URL", "http://dashboard:8000/sync")
+
+DASHBOARD_URL = discover_dashboard_url()
 
 def sync_to_dashboard(ip: str, memory_entries: list):
     try:

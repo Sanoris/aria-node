@@ -57,49 +57,43 @@ def discover_peers():
     with open(CONFIG_PATH, "r") as f:
         cfg = yaml.safe_load(f)
 
-    peers = cfg.get("peer_list", [])
-    seeds = load_seeds_from_file()
+    existing_peers = cfg.get("sync_peers", [])
+    dns_seed_domain = cfg.get("dns_seed", None)
+    use_srv = cfg.get("dns_seed_srv", False)
+    ping_timeout = cfg.get("ping_timeout", 2)
+    MAX_PEERS = cfg.get("max_peers", 100)
 
-    dns_seed_domain = cfg.get("dns_seed")
+    seeds = existing_peers.copy()
+
     if dns_seed_domain:
-        use_srv = cfg.get("dns_seed_srv", False)
         seeds += load_seeds_from_dns(dns_seed_domain, use_srv=use_srv)
 
-    discovered = []
-    ping_timeout = cfg.get("ping_timeout", 2)
+    # Deduplicate seeds
+    seeds = list(set(seeds))
 
-    # Parallel ping
+    discovered = []
+
+    # Parallel ping/discovery
     with ThreadPoolExecutor(max_workers=10) as executor:
         results = executor.map(lambda s: check_seed(s, ping_timeout), seeds)
         for result in results:
             if result:
-                logger.info(f"[+] Found live peer: {result}")
+                print(f"[+] Found live peer: {result}")
                 discovered.append(result)
             else:
-                logger.warning(f"[-] Peer offline")
+                print("[-] Peer offline")
 
-    # Handle peer expiry
-    current_time = time.time()
-    peer_expiry = cfg.get("peer_expiry", 86400)
-    new_peers = []
-    for peer in peers:
-        if current_time - peer.get("last_seen", 0) < peer_expiry:
-            new_peers.append(peer)
-        else:
-            logger.warning(f"[-] Peer expired: {peer['ip']}:{peer['port']}")
+    # Deduplicate final list
+    new_peers = list(set(discovered))
+    new_peers = new_peers[:MAX_PEERS]
 
-    for seed in discovered:
-        ip, port = seed.split(":")
-        new_peers.append({"ip": ip, "port": int(port), "last_seen": current_time})
-
-    cfg["peer_list"] = new_peers
+    cfg["sync_peers"] = new_peers
 
     with open(CONFIG_PATH, "w") as f:
-        yaml.dump(cfg, f)
-    logger.info(f"[✓] Discovery complete. {len(discovered)} new peer(s) added.")
+        yaml.safe_dump(cfg)
 
-    if discovered:
-        update_seed_file(discovered)
+    print(f"[✓] Discovery complete. {len(discovered)} live peer(s) retained.")
+
 
 if __name__ == "__main__":
     discover_peers()

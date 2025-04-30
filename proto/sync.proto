@@ -1,22 +1,28 @@
 syntax = "proto3";
 
-package sync;
-
 service AriaPeer {
-  rpc SyncMemory (SyncMemoryRequest) returns (SyncAck);
+  rpc PerformHandshake(HandshakeRequest) returns (HandshakeResponse);
+  rpc SyncMemory(SyncMemoryRequest) returns (SyncMemoryResponse);
+}
+
+message HandshakeRequest {
+  bytes sender_public_key = 1;
+}
+
+message HandshakeResponse {
+  bytes peer_public_key = 1;
 }
 
 message SyncMemoryRequest {
   string sender_id = 1;
   bytes encrypted_memory = 2;
   bytes signature = 3;
-  string current_cycle_id = 4;         // New field for cycle coordination
-  repeated string active_plugins = 5;  // New field for plugin status
+  string current_cycle_id = 4;
+  repeated string active_plugins = 5;
 }
 
-message SyncAck {
-  bool success = 1;
-  string message = 2;
-  string peer_cycle_id = 3;            // New field to echo peer's cycle ID
-  repeated string peer_active_plugins = 4; // New field to echo peer's active plugins
+message SyncMemoryResponse {
+  string message = 1;
+  string peer_cycle_id = 2;
+  repeated string active_plugins = 3;  // ✅ Ensure this is part of response
 }

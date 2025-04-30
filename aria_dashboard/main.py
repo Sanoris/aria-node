@@ -8,7 +8,7 @@ from pathlib import Path
 from datetime import datetime
 
 app = FastAPI()
-log_path = Path("peer_logs.json")
+log_path = Path("./aria_dashboard/peer_logs.json")
 
 app.add_middleware(
     CORSMiddleware,
@@ -113,4 +113,4 @@ def sync_logs(sync: PeerSync):
 
 
 # Serve static HTML UI
-app.mount("/", StaticFiles(directory="aria_dashboard_frontend", html=True), name="frontend")
+app.mount("/", StaticFiles(directory="./aria_dashboard/aria_dashboard_frontend", html=True), name="frontend")
