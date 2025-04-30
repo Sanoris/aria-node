@@ -44,6 +44,11 @@ class AriaPeerStub(object):
                 request_serializer=sync__pb2.SyncMemoryRequest.SerializeToString,
                 response_deserializer=sync__pb2.SyncMemoryResponse.FromString,
                 _registered_method=True)
+        self.SendToDashboard = channel.unary_unary(
+                '/AriaPeer/SendToDashboard',
+                request_serializer=sync__pb2.DashboardSyncRequest.SerializeToString,
+                response_deserializer=sync__pb2.DashboardSyncResponse.FromString,
+                _registered_method=True)
 
 
 class AriaPeerServicer(object):
@@ -61,6 +66,12 @@ class AriaPeerServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SendToDashboard(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AriaPeerServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -73,6 +84,11 @@ def add_AriaPeerServicer_to_server(servicer, server):
                     servicer.SyncMemory,
                     request_deserializer=sync__pb2.SyncMemoryRequest.FromString,
                     response_serializer=sync__pb2.SyncMemoryResponse.SerializeToString,
+            ),
+            'SendToDashboard': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendToDashboard,
+                    request_deserializer=sync__pb2.DashboardSyncRequest.FromString,
+                    response_serializer=sync__pb2.DashboardSyncResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -129,6 +145,33 @@ class AriaPeer(object):
             '/AriaPeer/SyncMemory',
             sync__pb2.SyncMemoryRequest.SerializeToString,
             sync__pb2.SyncMemoryResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def SendToDashboard(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/AriaPeer/SendToDashboard',
+            sync__pb2.DashboardSyncRequest.SerializeToString,
+            sync__pb2.DashboardSyncResponse.FromString,
             options,
             channel_credentials,
             insecure,
