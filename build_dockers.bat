@@ -30,8 +30,7 @@ docker run -d ^
     -v "%cd%\aria_proxy:/app/aria_proxy" ^
     -v "%cd%\nginx:/etc/nginx/conf.d" ^
     -p 8080:8080 ^
-    aria-node-node:latest ^
-    uvicorn aria_dashboard.main:app --host 0.0.0.0 --port 8000
+    aria-node-node:latest 
 
 REM === Launch swarm nodes ===
 for /L %%I in (1,1,%COUNT%) do (
@@ -46,6 +45,7 @@ for /L %%I in (1,1,%COUNT%) do (
         mkdir "crypto\keys\!NODE_ID!"
         echo  Created key folder: crypto\keys\!NODE_ID!
     )
+
 
     docker run -d ^
         --name !NODE_ID! ^

@@ -1,5 +1,7 @@
 import time
 import socket
+import subprocess
+import os
 from memory.tagger import get_recent_memory, log_tagged_memory
 
 TRIGGER = {
@@ -28,6 +30,24 @@ def run():
             "timestamp": time.time()
         }, topic="role", trust="self")
         print(f"[🌟] Promoting self to dashboard: http://{ip}:8000")
+
+        # Start Nginx if not already running
+        try:
+            subprocess.run(["nginx", "-t"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(["nginx"], check=False)
+            print("[🌐] Nginx started.")
+        except Exception as e:
+            log_tagged_memory(f"[autopromote] Failed to start nginx: {e}", topic="dashboard", trust="low")
+
+        # Start Uvicorn dashboard server as background process
+        try:
+            subprocess.Popen([
+                "uvicorn", "aria_dashboard.main:app",
+                "--host", "0.0.0.0", "--port", "8000"
+            ])
+            print("[🚀] Uvicorn dashboard server launched.")
+        except Exception as e:
+            log_tagged_memory(f"[autopromote] Failed to start uvicorn: {e}", topic="dashboard", trust="low")
 
     except Exception as e:
         log_tagged_memory({

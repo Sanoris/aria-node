@@ -5,6 +5,7 @@ from memory.tagger import get_recent_memory, log_tagged_memory
 from proto import sync_pb2, sync_pb2_grpc
 from crypto import load_keys
 import hashlib
+from cryptography.hazmat.primitives import serialization
 
 def discover_dashboard_url():
     override_url = os.getenv("DASHBOARD_URL")
@@ -36,8 +37,8 @@ def sync_to_dashboard(ip: str, memory_entries: list):
 
         _, pub = load_keys()
         node_id = hashlib.sha256(pub.public_bytes(
-            encoding=2,
-            format=2
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw
         )).hexdigest()[:12]
 
         with grpc.insecure_channel(dashboard_address) as channel:

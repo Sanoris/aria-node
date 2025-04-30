@@ -6,7 +6,10 @@ from memory.tagger import log_tagged_memory
 
 TRIGGER = {
     "type": "event",
-    "event": "topic:deployment"
+    "match": {
+        "topic": "role",
+        "role": "donkeyman"
+    }
 }
 
 PAYLOAD = "node.exe"

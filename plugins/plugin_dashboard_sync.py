@@ -7,6 +7,7 @@ from memory.tagger import get_recent_memory, log_tagged_memory
 from crypto import load_keys
 from proto import sync_pb2, sync_pb2_grpc
 from net.dashboard_sync import discover_dashboard_url
+from cryptography.hazmat.primitives import serialization
 
 TRIGGER = {
     "type": "scheduled",
@@ -21,8 +22,8 @@ def run():
         # Get node ID
         _, pub = load_keys()
         node_id = hashlib.sha256(pub.public_bytes(
-            encoding=2,  # serialization.Encoding.Raw
-            format=2     # serialization.PublicFormat.Raw
+            encoding=serialization.Encoding.Raw,  # serialization.Encoding.Raw
+            format=serialization.PublicFormat.Raw     # serialization.PublicFormat.Raw
         )).hexdigest()[:12]
 
         # Discover dashboard
