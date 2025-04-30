@@ -1,1 +1,16 @@
-pyyaml
+psutil
+PyYAML
+fastapi
+uvicorn
+pydantic
+transformers
+torch
+cryptography
+grpcio
+grpcio-tools
+protobuf
+requests
+dnspython
+scapy
+beautifulsoup4
+stem

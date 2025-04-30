@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  node1:
+    build: .
+    container_name: aria-node-1
+    volumes:
+      - ./plugins:/app/plugins
+    environment:
+      - NODE_ID=aria-node-001
+      - SYNC_PEER=aria-node-2
+    ports:
+      - "50051:50051"
+
+  node2:
+    build: .
+    container_name: aria-node-2
+    volumes:
+      - ./plugins:/app/plugins
+    environment:
+      - NODE_ID=aria-node-002
+      - SYNC_PEER=aria-node-1
+    ports:
+      - "50052:50051"
