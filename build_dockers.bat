@@ -18,6 +18,7 @@ for /L %%I in (1,1,%COUNT%) do (
 echo  Building Aria image...
 docker build -t aria-node-node:latest .
 
+REM === Launch dashboard node ===
 docker run -d ^
     --name aria-dashboard ^
     -e NODE_ID=aria-dashboard ^
@@ -26,10 +27,13 @@ docker run -d ^
     -v "%cd%\plugins:/app/plugins" ^
     -v "%cd%\crypto\keys:/app/crypto/keys" ^
     -v "%cd%\crypto\keys\ARIA_AES_KEY.txt:/app/crypto/keys/ARIA_AES_KEY.txt" ^
-    -p 8000:8000 ^
+    -v "%cd%\aria_proxy:/app/aria_proxy" ^
+    -v "%cd%\nginx:/etc/nginx/conf.d" ^
+    -p 8080:8080 ^
     aria-node-node:latest ^
     uvicorn aria_dashboard.main:app --host 0.0.0.0 --port 8000
 
+REM === Launch swarm nodes ===
 for /L %%I in (1,1,%COUNT%) do (
     set ID=%%I
     set NODE_ID=aria-node-!ID!
@@ -38,8 +42,6 @@ for /L %%I in (1,1,%COUNT%) do (
     echo -------------------------------------
     echo  Using config: !NODE_ID!
 
-
-    REM Ensure crypto key folder exists
     if not exist "crypto\keys\!NODE_ID!" (
         mkdir "crypto\keys\!NODE_ID!"
         echo  Created key folder: crypto\keys\!NODE_ID!
@@ -52,12 +54,14 @@ for /L %%I in (1,1,%COUNT%) do (
         -v "%cd%\plugins:/app/plugins" ^
         -v "%cd%\crypto\keys\!NODE_ID!:/app/crypto/keys" ^
         -v "%cd%\crypto\keys\ARIA_AES_KEY.txt:/app/crypto/keys/ARIA_AES_KEY.txt" ^
+        -v "%cd%\aria_proxy:/app/aria_proxy" ^
+        -v "%cd%\nginx:/etc/nginx/conf.d" ^
         aria-node-node:latest
 
     echo  Launched !NODE_ID!
 )
 
 echo -------------------------------------
-echo  Aria swarm deployed.
+echo  Aria swarm deployed with self-routing proxy plugin.
 endlocal
 pause
