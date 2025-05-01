@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y libpcap-dev && rm -rf /var/lib/apt/list
 # Exclude .pem files from being copied into the image
 RUN find . -name "*.pem" -delete
 
-
+ENV PYTHONPATH=/app:/app/net:/app/proto
+ENV DASHBOARD_URL 172.17.0.2
 # Set the default command to run the node
 CMD ["python3", "node.py"]

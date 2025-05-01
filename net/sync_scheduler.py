@@ -4,6 +4,7 @@ import yaml
 import json
 import os
 from .peer_client import sync_with_peer
+from memory.tagger import get_recent_memory
 
 CONFIG_PATH = "config.yaml"
 STATUS_PATH = "peer_status.json"
@@ -33,7 +34,8 @@ def sync_loop(peers, interval):
         for peer in peers:
             try:
                 print(f"[>] Syncing with {peer}")
-                sync_with_peer(peer)
+                payload = json.dumps(get_recent_memory(limit=20)).encode("utf-8")
+                sync_with_peer(peer, payload)
                 update_status(peer, success=True)
             except Exception as e:
                 print(f"[!] Failed to sync with {peer}: {e}")

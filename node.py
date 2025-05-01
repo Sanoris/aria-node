@@ -2,7 +2,7 @@ import time
 import threading
 import os
 from memory.decay import decay_memory
-from memory.tagger import log_tagged_memory
+from memory.tagger import log_tagged_memory, get_recent_memory
 from net.plugin_trigger_engine import run_plugins_by_trigger, start_plugins
 from net.peer_client import sync_with_peer, load_peers 
 from net.seed_decider import prioritize
@@ -30,8 +30,9 @@ def background_plugins():
 def background_sync():
     while True:
         SYNC_PEERS = load_peers()
-        sync_with_peer(random.choice(SYNC_PEERS).strip())
-        time.sleep(5)
+        entries = get_recent_memory(limit=20)
+        payload = json.dumps(entries).encode("utf-8")
+        sync_with_peer(random.choice(SYNC_PEERS).strip(), payload)
 
 def background_vote():
     while True:

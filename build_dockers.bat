@@ -29,8 +29,9 @@ docker run -d ^
     -v "%cd%\crypto\keys\ARIA_AES_KEY.txt:/app/crypto/keys/ARIA_AES_KEY.txt" ^
     -v "%cd%\aria_proxy:/app/aria_proxy" ^
     -v "%cd%\nginx:/etc/nginx/conf.d" ^
-    -p 8080:8080 ^
-    aria-node-node:latest 
+    -p 8001:8001 ^
+    aria-node-node:latest ^
+    python aria_dashboard/main.py
 
 REM === Launch swarm nodes ===
 for /L %%I in (1,1,%COUNT%) do (

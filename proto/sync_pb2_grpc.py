@@ -3,8 +3,7 @@
 import grpc
 import warnings
 
-from proto import sync_pb2 as sync__pb2  # ✅
-
+from proto import sync_pb2 as sync__pb2
 
 GRPC_GENERATED_VERSION = '1.71.0'
 GRPC_VERSION = grpc.__version__
@@ -50,6 +49,11 @@ class AriaPeerStub(object):
                 request_serializer=sync__pb2.DashboardSyncRequest.SerializeToString,
                 response_deserializer=sync__pb2.DashboardSyncResponse.FromString,
                 _registered_method=True)
+        self.ShareMemory = channel.unary_unary(
+                '/AriaPeer/ShareMemory',
+                request_serializer=sync__pb2.MemorySyncRequest.SerializeToString,
+                response_deserializer=sync__pb2.MemorySyncResponse.FromString,
+                _registered_method=True)
 
 
 class AriaPeerServicer(object):
@@ -73,6 +77,12 @@ class AriaPeerServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ShareMemory(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AriaPeerServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -90,6 +100,11 @@ def add_AriaPeerServicer_to_server(servicer, server):
                     servicer.SendToDashboard,
                     request_deserializer=sync__pb2.DashboardSyncRequest.FromString,
                     response_serializer=sync__pb2.DashboardSyncResponse.SerializeToString,
+            ),
+            'ShareMemory': grpc.unary_unary_rpc_method_handler(
+                    servicer.ShareMemory,
+                    request_deserializer=sync__pb2.MemorySyncRequest.FromString,
+                    response_serializer=sync__pb2.MemorySyncResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -173,6 +188,33 @@ class AriaPeer(object):
             '/AriaPeer/SendToDashboard',
             sync__pb2.DashboardSyncRequest.SerializeToString,
             sync__pb2.DashboardSyncResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ShareMemory(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/AriaPeer/ShareMemory',
+            sync__pb2.MemorySyncRequest.SerializeToString,
+            sync__pb2.MemorySyncResponse.FromString,
             options,
             channel_credentials,
             insecure,

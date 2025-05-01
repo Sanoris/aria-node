@@ -12,7 +12,7 @@ def discover_dashboard_url():
     if override_url:
         return override_url
 
-    candidates = get_recent_memory(topic="role", limit=10)
+    candidates = get_recent_memory(topic="role", limit=200)
     for entry in candidates:
         content = entry.get("content", {})
         if content.get("role") == "dashboard":

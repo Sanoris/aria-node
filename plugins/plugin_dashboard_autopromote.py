@@ -3,13 +3,14 @@ import socket
 import subprocess
 import os
 from memory.tagger import get_recent_memory, log_tagged_memory
+from net.dashboard_server import serve_grpc
 
 TRIGGER = {
     "type": "event",
     "match": {
-        "topic": "dashboard",
         "event": "dashboard_discovery",
-        "status": "not_found"
+        "status": "not_found",
+        "knockKnock": "urdead"
     }
 }
 
@@ -46,6 +47,7 @@ def run():
                 "--host", "0.0.0.0", "--port", "8000"
             ])
             print("[🚀] Uvicorn dashboard server launched.")
+            #serve_grpc(port=8000)  # Start gRPC server in the same process
         except Exception as e:
             log_tagged_memory(f"[autopromote] Failed to start uvicorn: {e}", topic="dashboard", trust="low")
 

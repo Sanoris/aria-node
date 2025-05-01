@@ -8,24 +8,19 @@ from crypto import load_keys
 from proto import sync_pb2, sync_pb2_grpc
 from net.dashboard_sync import discover_dashboard_url
 from cryptography.hazmat.primitives import serialization
+from net.peer_client import load_active_plugins, load_peers, perform_handshake_with_peer, sanitize_peer_address, sync_with_peer
+import json
 
 TRIGGER = {
     "type": "scheduled",
-    "interval": 300  # seconds
+    "interval": 30  # seconds
 }
 
 def run():
     try:
-        ip = socket.gethostbyname(socket.gethostname())
-        memory_entries = get_recent_memory(limit=20)
-
-        # Get node ID
-        _, pub = load_keys()
-        node_id = hashlib.sha256(pub.public_bytes(
-            encoding=serialization.Encoding.Raw,  # serialization.Encoding.Raw
-            format=serialization.PublicFormat.Raw     # serialization.PublicFormat.Raw
-        )).hexdigest()[:12]
-
+        
+        memory_entries = get_recent_memory(limit=555)
+        serialized = [json.dumps(e).encode("utf-8") for e in memory_entries]
         # Discover dashboard
         dashboard_url = discover_dashboard_url()
         if not dashboard_url:
@@ -37,19 +32,8 @@ def run():
             return
 
         # Strip to IP:port for gRPC
-        target = dashboard_url.replace("http://", "").replace("/sync", "")
-        with grpc.insecure_channel(target) as channel:
-            stub = sync_pb2_grpc.AriaPeerStub(channel)
-            stub.SendToDashboard(sync_pb2.DashboardSyncRequest(
-                sender_id=node_id,
-                entries=[
-                    sync_pb2.MemoryEntry(
-                        topic=e.get("topic", "misc"),
-                        msg=e.get("msg", "Unknown entry"),
-                        timestamp=e.get("timestamp", datetime.now().isoformat())
-                    ) for e in memory_entries
-                ]
-            ))
+        target = sanitize_peer_address(dashboard_url)
+        sync_with_peer(target, serialized)
 
         log_tagged_memory({
             "event": "dashboard_sync",

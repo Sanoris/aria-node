@@ -1,0 +1,56 @@
+# Python junk
+__pycache__/
+*.pyc
+*.pyo
+
+# Env/keys
+.env
+*.env.*
+crypto/keys/*
+
+
+# Data + logs
+aria_dashboard/peer_logs.json
+
+# Git + editors
+.git/
+.vscode/
+*.swp
+
+# Virtual environments
+.venv/
+.env/
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Build caches
+*.egg-info/
+dist/
+build/
+__dist/
+
+
+# 🐍 Python cache & build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 🛠 Nuitka / PyInstaller build outputs
+build/
+dist/
+*.spec
+
+# ⚙️ Virtual environments
+.venv/
+env/
+venv/
+
+# 🔑 Sensitive files
+recon/shodan_key.txt
+*.key
+*.pem
+*.zip
+*.log

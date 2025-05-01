@@ -24,6 +24,8 @@ def scheduled_runner(plugin, interval):
         time.sleep(interval)
 
 def entry_matches(entry, match_dict):
+    if not isinstance(entry, dict):
+        return False
     return all(entry.get(k) == v for k, v in match_dict.items())
 
 def event_watcher(plugin, match_dict):

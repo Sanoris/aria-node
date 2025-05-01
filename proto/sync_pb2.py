@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nsync.proto\"-\n\x10HandshakeRequest\x12\x19\n\x11sender_public_key\x18\x01 \x01(\x0c\",\n\x11HandshakeResponse\x12\x17\n\x0fpeer_public_key\x18\x01 \x01(\x0c\"\x85\x01\n\x11SyncMemoryRequest\x12\x11\n\tsender_id\x18\x01 \x01(\t\x12\x18\n\x10\x65ncrypted_memory\x18\x02 \x01(\x0c\x12\x11\n\tsignature\x18\x03 \x01(\x0c\x12\x18\n\x10\x63urrent_cycle_id\x18\x04 \x01(\t\x12\x16\n\x0e\x61\x63tive_plugins\x18\x05 \x03(\t\"T\n\x12SyncMemoryResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x15\n\rpeer_cycle_id\x18\x02 \x01(\t\x12\x16\n\x0e\x61\x63tive_plugins\x18\x03 \x03(\t\"H\n\x14\x44\x61shboardSyncRequest\x12\x11\n\tsender_id\x18\x01 \x01(\t\x12\x1d\n\x07\x65ntries\x18\x02 \x03(\x0b\x32\x0c.MemoryEntry\"(\n\x15\x44\x61shboardSyncResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"<\n\x0bMemoryEntry\x12\r\n\x05topic\x18\x01 \x01(\t\x12\x0b\n\x03msg\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\t\"~\n\x0cNodeMetadata\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\n\n\x02ip\x18\x02 \x01(\t\x12\n\n\x02os\x18\x03 \x01(\t\x12\x0c\n\x04\x61rch\x18\x04 \x01(\t\x12\x10\n\x08hostname\x18\x05 \x01(\t\x12\x16\n\x0euptime_seconds\x18\x06 \x01(\x05\x12\r\n\x05roles\x18\x07 \x03(\t\"_\n\x10PluginReputation\x12\x13\n\x0bplugin_name\x18\x01 \x01(\t\x12\x0c\n\x04hash\x18\x02 \x01(\t\x12\x14\n\x0csuccess_rate\x18\x03 \x01(\x02\x12\x12\n\nsync_count\x18\x04 \x01(\x05\"e\n\x11NodeTrustSnapshot\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x13\n\x0btrust_score\x18\x02 \x01(\x02\x12\x14\n\x0cstrike_count\x18\x03 \x01(\x05\x12\x14\n\x0clast_failure\x18\x04 \x01(\t2\xbe\x01\n\x08\x41riaPeer\x12\x39\n\x10PerformHandshake\x12\x11.HandshakeRequest\x1a\x12.HandshakeResponse\x12\x35\n\nSyncMemory\x12\x12.SyncMemoryRequest\x1a\x13.SyncMemoryResponse\x12@\n\x0fSendToDashboard\x12\x15.DashboardSyncRequest\x1a\x16.DashboardSyncResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\nsync.proto\"-\n\x10HandshakeRequest\x12\x19\n\x11sender_public_key\x18\x01 \x01(\x0c\",\n\x11HandshakeResponse\x12\x17\n\x0fpeer_public_key\x18\x01 \x01(\x0c\"\x85\x01\n\x11SyncMemoryRequest\x12\x11\n\tsender_id\x18\x01 \x01(\t\x12\x18\n\x10\x65ncrypted_memory\x18\x02 \x01(\x0c\x12\x11\n\tsignature\x18\x03 \x01(\x0c\x12\x18\n\x10\x63urrent_cycle_id\x18\x04 \x01(\t\x12\x16\n\x0e\x61\x63tive_plugins\x18\x05 \x03(\t\"T\n\x12SyncMemoryResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x15\n\rpeer_cycle_id\x18\x02 \x01(\t\x12\x16\n\x0e\x61\x63tive_plugins\x18\x03 \x03(\t\"H\n\x14\x44\x61shboardSyncRequest\x12\x11\n\tsender_id\x18\x01 \x01(\t\x12\x1d\n\x07\x65ntries\x18\x02 \x03(\x0b\x32\x0c.MemoryEntry\"(\n\x15\x44\x61shboardSyncResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"<\n\x0bMemoryEntry\x12\r\n\x05topic\x18\x01 \x01(\t\x12\x0b\n\x03msg\x18\x02 \x01(\t\x12\x11\n\ttimestamp\x18\x03 \x01(\t\"$\n\x11MemorySyncRequest\x12\x0f\n\x07\x65ntries\x18\x01 \x03(\t\"$\n\x12MemorySyncResponse\x12\x0e\n\x06status\x18\x01 \x01(\t\"~\n\x0cNodeMetadata\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\n\n\x02ip\x18\x02 \x01(\t\x12\n\n\x02os\x18\x03 \x01(\t\x12\x0c\n\x04\x61rch\x18\x04 \x01(\t\x12\x10\n\x08hostname\x18\x05 \x01(\t\x12\x16\n\x0euptime_seconds\x18\x06 \x01(\x05\x12\r\n\x05roles\x18\x07 \x03(\t\"_\n\x10PluginReputation\x12\x13\n\x0bplugin_name\x18\x01 \x01(\t\x12\x0c\n\x04hash\x18\x02 \x01(\t\x12\x14\n\x0csuccess_rate\x18\x03 \x01(\x02\x12\x12\n\nsync_count\x18\x04 \x01(\x05\"e\n\x11NodeTrustSnapshot\x12\x0f\n\x07node_id\x18\x01 \x01(\t\x12\x13\n\x0btrust_score\x18\x02 \x01(\x02\x12\x14\n\x0cstrike_count\x18\x03 \x01(\x05\x12\x14\n\x0clast_failure\x18\x04 \x01(\t2\xf6\x01\n\x08\x41riaPeer\x12\x39\n\x10PerformHandshake\x12\x11.HandshakeRequest\x1a\x12.HandshakeResponse\x12\x35\n\nSyncMemory\x12\x12.SyncMemoryRequest\x1a\x13.SyncMemoryResponse\x12@\n\x0fSendToDashboard\x12\x15.DashboardSyncRequest\x1a\x16.DashboardSyncResponse\x12\x36\n\x0bShareMemory\x12\x12.MemorySyncRequest\x1a\x13.MemorySyncResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -45,12 +45,16 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_DASHBOARDSYNCRESPONSE']._serialized_end=443
   _globals['_MEMORYENTRY']._serialized_start=445
   _globals['_MEMORYENTRY']._serialized_end=505
-  _globals['_NODEMETADATA']._serialized_start=507
-  _globals['_NODEMETADATA']._serialized_end=633
-  _globals['_PLUGINREPUTATION']._serialized_start=635
-  _globals['_PLUGINREPUTATION']._serialized_end=730
-  _globals['_NODETRUSTSNAPSHOT']._serialized_start=732
-  _globals['_NODETRUSTSNAPSHOT']._serialized_end=833
-  _globals['_ARIAPEER']._serialized_start=836
-  _globals['_ARIAPEER']._serialized_end=1026
+  _globals['_MEMORYSYNCREQUEST']._serialized_start=507
+  _globals['_MEMORYSYNCREQUEST']._serialized_end=543
+  _globals['_MEMORYSYNCRESPONSE']._serialized_start=545
+  _globals['_MEMORYSYNCRESPONSE']._serialized_end=581
+  _globals['_NODEMETADATA']._serialized_start=583
+  _globals['_NODEMETADATA']._serialized_end=709
+  _globals['_PLUGINREPUTATION']._serialized_start=711
+  _globals['_PLUGINREPUTATION']._serialized_end=806
+  _globals['_NODETRUSTSNAPSHOT']._serialized_start=808
+  _globals['_NODETRUSTSNAPSHOT']._serialized_end=909
+  _globals['_ARIAPEER']._serialized_start=912
+  _globals['_ARIAPEER']._serialized_end=1158
 # @@protoc_insertion_point(module_scope)

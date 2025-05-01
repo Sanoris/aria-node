@@ -3,8 +3,8 @@ PyYAML
 fastapi
 uvicorn
 pydantic
-transformers
-torch
+#transformers
+#torch
 cryptography
 grpcio
 grpcio-tools

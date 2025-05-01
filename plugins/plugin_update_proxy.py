@@ -38,15 +38,22 @@ def run():
         return
 
     try:
+        if not Path(TEMPLATE_PATH).exists():
+            log_tagged_memory(f"[proxy_plugin] Missing template file: {TEMPLATE_PATH}", topic="dashboard", trust="low")
+            return
+
         with open(TEMPLATE_PATH, "r") as f:
             template = f.read()
 
         new_conf = template.replace("DASHBOARD_IP", ip)
-        Path(NGINX_OUTPUT_PATH).parent.mkdir(parents=True, exist_ok=True)
+
+        Path(os.path.dirname(NGINX_OUTPUT_PATH)).mkdir(parents=True, exist_ok=True)
+
         with open(NGINX_OUTPUT_PATH, "w") as f:
             f.write(new_conf)
 
         subprocess.run(["nginx", "-s", "reload"], check=True)
         log_tagged_memory(f"[proxy_plugin] Nginx updated to route to {ip}:8000", topic="dashboard", trust="high")
+
     except Exception as e:
         log_tagged_memory(f"[proxy_plugin] Failed to update nginx: {e}", topic="dashboard", trust="low")

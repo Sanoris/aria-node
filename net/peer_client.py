@@ -62,6 +62,8 @@ def sanitize_peer_address(peer_address):
 
 def sync_with_peer(peer_address, memory_payload=b"", signature=b"sync"):
     from .sync_scheduler import update_status
+    if isinstance(memory_payload, list):
+        memory_payload = json.dumps(memory_payload).encode("utf-8")
     try:
         peer_public_key = load_peer_public_key(peer_address)
         if not peer_public_key:

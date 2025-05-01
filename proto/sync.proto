@@ -4,6 +4,7 @@ service AriaPeer {
   rpc PerformHandshake(HandshakeRequest) returns (HandshakeResponse);
   rpc SyncMemory(SyncMemoryRequest) returns (SyncMemoryResponse);
   rpc SendToDashboard(DashboardSyncRequest) returns (DashboardSyncResponse);
+  rpc ShareMemory(MemorySyncRequest) returns (MemorySyncResponse);
 }
 
 message HandshakeRequest {
@@ -41,6 +42,14 @@ message MemoryEntry {
   string topic = 1;
   string msg = 2;
   string timestamp = 3;
+}
+
+message MemorySyncRequest {
+  repeated string entries = 1;
+}
+
+message MemorySyncResponse {
+  string status = 1;
 }
 
 message NodeMetadata {
