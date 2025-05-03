@@ -17,7 +17,7 @@ for /L %%I in (1,1,%COUNT%) do (
 
 echo  Building Aria image...
 docker build -t aria-node-node:latest .
-
+REM docker build -f Dockerfile_LLM -t aria-node-full .
 REM === Launch dashboard node ===
 docker run -d ^
     --name aria-dashboard ^
@@ -30,7 +30,7 @@ docker run -d ^
     -v "%cd%\aria_proxy:/app/aria_proxy" ^
     -v "%cd%\nginx:/etc/nginx/conf.d" ^
     -p 8001:8001 ^
-    aria-node-node:latest ^
+    aria-node-full:latest ^
     python aria_dashboard/main.py
 
 REM === Launch swarm nodes ===
@@ -56,7 +56,6 @@ for /L %%I in (1,1,%COUNT%) do (
         -v "%cd%\crypto\keys\!NODE_ID!:/app/crypto/keys" ^
         -v "%cd%\crypto\keys\ARIA_AES_KEY.txt:/app/crypto/keys/ARIA_AES_KEY.txt" ^
         -v "%cd%\aria_proxy:/app/aria_proxy" ^
-        -v "%cd%\nginx:/etc/nginx/conf.d" ^
         aria-node-node:latest
 
     echo  Launched !NODE_ID!

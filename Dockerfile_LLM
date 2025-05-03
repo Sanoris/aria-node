@@ -1,0 +1,64 @@
+# Generalized Dockerfile for aria-node with BitNet support
+FROM python:3.9-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements and install Python deps
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the full project into the image
+COPY . .
+
+
+# Install required system packages
+RUN apt-get update && \
+    apt-get install -y \
+    libpcap-dev \
+    git \
+    wget \
+    curl \
+    gnupg \
+    lsb-release \
+    software-properties-common && \
+    rm -rf /var/lib/apt/lists/*
+
+# Add LLVM repo manually to get Clang 18
+RUN curl -fsSL https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor -o /usr/share/keyrings/llvm.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/llvm.gpg] http://apt.llvm.org/$(lsb_release -sc)/ llvm-toolchain-$(lsb_release -sc)-18 main" \
+    > /etc/apt/sources.list.d/llvm.list && \
+    apt-get update && \
+    apt-get install -y clang-18 cmake && \
+    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-18 100
+
+# Optional: Delete sensitive files like .pem
+RUN find . -name "*.pem" -delete
+
+# Required C/C++ build tools for BitNet kernel build
+RUN apt-get update && \
+    apt-get install -y build-essential g++ && \
+    rm -rf /var/lib/apt/lists/*
+
+# Clone BitNet + install its requirements + patch setup script
+RUN git clone --recursive https://github.com/microsoft/BitNet.git && \
+    cd BitNet && \
+    pip install -r requirements.txt && \
+    mkdir -p models && \
+    huggingface-cli download microsoft/BitNet-b1.58-2B-4T-gguf --local-dir models/BitNet-b1.58-2B-4T && \
+    python setup_env.py -md models/BitNet-b1.58-2B-4T -q i2_s
+
+
+RUN python -m grpc_tools.protoc \
+    -I=proto \
+    --python_out=proto \
+    --grpc_python_out=proto \
+    proto/sync.proto
+
+# Set environment variables
+ENV PYTHONPATH=/app:/app/net:/app/proto
+ENV DASHBOARD_URL=172.17.0.2:8001
+ENV START_FILE=node.py
+
+# Default run command
+CMD ["sh", "-c", "python $START_FILE"]

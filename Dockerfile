@@ -18,6 +18,6 @@ RUN apt-get update && apt-get install -y libpcap-dev && rm -rf /var/lib/apt/list
 RUN find . -name "*.pem" -delete
 
 ENV PYTHONPATH=/app:/app/net:/app/proto
-ENV DASHBOARD_URL 172.17.0.2
+ENV DASHBOARD_URL=172.17.0.2:8001
 # Set the default command to run the node
 CMD ["python3", "node.py"]
