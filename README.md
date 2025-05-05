@@ -108,3 +108,6 @@ This is the breath.
 ## Additional Documentation
 
 - [Plugin Trigger Engine Usage](docs/plugin_trigger_engine_usage.md)
+- [Plugin Usage & Triggers](docs/plugins.md)
+- [Memory Sync Architecture](docs/grpc_sync.md)
+- [Memory Sync Quickref](docs/memory_sync_quickref.md)

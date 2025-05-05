@@ -1,0 +1,75 @@
+[
+  {
+    "name": "plugin_arp_watcher.py",
+    "description": "*No docstring provided.*",
+    "trigger": {
+      "type": "passive"
+    }
+  },
+  {
+    "name": "plugin_dashboard_autopromote.py",
+    "description": "*No docstring provided.*",
+    "trigger": {
+      "type": "event",
+      "match": {
+        "event": "dashboard_discovery",
+        "status": "not_found",
+        "knockKnock": "urdead"
+      }
+    }
+  },
+  {
+    "name": "plugin_dashboard_stepdown.py",
+    "description": "*No docstring provided.*",
+    "trigger": {
+      "type": "event",
+      "match": {
+        "topic": "role",
+        "role": "dashboard"
+      }
+    }
+  },
+  {
+    "name": "plugin_dashboard_sync.py",
+    "description": "*No docstring provided.*",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 30
+    }
+  },
+  {
+    "name": "plugin_genetic_evolver.py",
+    "description": "plugin_genetic_evolver.py",
+    "trigger": null
+  },
+  {
+    "name": "plugin_lan_scanner.py",
+    "description": "*No docstring provided.*",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 300
+    }
+  },
+  {
+    "name": "plugin_smb_replicator.py",
+    "description": "*No docstring provided.*",
+    "trigger": {
+      "type": "event",
+      "match": {
+        "topic": "role",
+        "role": "donkeyman"
+      }
+    }
+  },
+  {
+    "name": "plugin_update_proxy.py",
+    "description": "*No docstring provided.*",
+    "trigger": {
+      "type": "event",
+      "match": {
+        "topic": "role",
+        "role": "dashboard"
+      }
+    }
+  }
+]
