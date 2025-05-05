@@ -52,6 +52,6 @@ def sync_to_dashboard(ip: str, memory_entries: list):
                         timestamp=e.get("timestamp", datetime.now().isoformat())
                     ) for e in memory_entries
                 ]
-            ))
+            ))#asdf
     except Exception as e:
         log_tagged_memory(f"Failed to sync to dashboard: {e}", topic="dashboard", trust="low")
