@@ -105,5 +105,6 @@ This is the breath.
 (*Document created April 29, 2025. To be updated as Aria-node continues to evolve.*)
 
 
-## Project Resources
-- [Shared Aria Swarm Overview](https://chatgpt.com/canvas/shared/68111add7350819197425d8d1edd3e23)
+## Additional Documentation
+
+- [Plugin Trigger Engine Usage](docs/plugin_trigger_engine_usage.md)
