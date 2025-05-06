@@ -15,12 +15,21 @@ TRIGGER = {
     "type": "scheduled",
     "interval": 30  # seconds
 }
-
+def sanitize_for_json(obj):
+    if isinstance(obj, dict):
+        return {k: sanitize_for_json(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [sanitize_for_json(v) for v in obj]
+    elif isinstance(obj, bytes):
+        return obj.decode('utf-8', errors='replace')
+    else:
+        return obj
 def run():
     try:
         
         memory_entries = get_recent_memory(limit=555)
-        serialized = [json.dumps(e).encode("utf-8") for e in memory_entries]
+        serialized = [sanitize_for_json(e) for e in memory_entries]
+
         # Discover dashboard
         dashboard_url = discover_dashboard_url()
         if not dashboard_url:

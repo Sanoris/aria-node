@@ -3,6 +3,7 @@ from concurrent import futures
 from proto import sync_pb2, sync_pb2_grpc
 from crypto import load_keys
 from cryptography.hazmat.primitives import serialization
+import os
 
 class AriaPeerServicer(sync_pb2_grpc.AriaPeerServicer):
     def PerformHandshake(self, request, context):
@@ -17,10 +18,18 @@ class AriaPeerServicer(sync_pb2_grpc.AriaPeerServicer):
 
     def SyncMemory(self, request, context):
         print(f"[📨] SyncMemory called by: {request.sender_id}")
+        plugins = [f for f in os.listdir("plugins") if f.endswith(".py")]
+        if request.HasField("plugin_push"):
+            from net.plugin_trigger_engine import receive_and_write_plugin
+            receive_and_write_plugin(
+                request.plugin_push.filename,
+                request.plugin_push.data_b64
+            )
+    
         return sync_pb2.SyncMemoryResponse(
             message="Memory sync accepted.",
             peer_cycle_id="42",
-            active_plugins=["plugin_dashboard_sync"]
+            active_plugins=plugins
         )
 
 def serve():

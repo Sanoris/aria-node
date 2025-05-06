@@ -1,10 +1,30 @@
 syntax = "proto3";
 
-service AriaPeer {
-  rpc PerformHandshake(HandshakeRequest) returns (HandshakeResponse);
-  rpc SyncMemory(SyncMemoryRequest) returns (SyncMemoryResponse);
-  rpc SendToDashboard(DashboardSyncRequest) returns (DashboardSyncResponse);
-  rpc ShareMemory(MemorySyncRequest) returns (MemorySyncResponse);
+message MemoryEntry {
+  string topic = 1;
+  string content = 2;
+  double timestamp = 3;
+  string trust = 4;
+}
+
+message PluginPush {
+  string filename = 1;
+  string data_b64 = 2;
+}
+
+message SyncMemoryRequest {
+  string sender_id = 1;
+  bytes encrypted_memory = 2;
+  bytes signature = 3;
+  string current_cycle_id = 4;
+  repeated string active_plugins = 5;
+  PluginPush plugin_push = 6;
+}
+
+message SyncMemoryResponse {
+  string message = 1;
+  string peer_cycle_id = 2;
+  repeated string active_plugins = 3;
 }
 
 message HandshakeRequest {
@@ -15,63 +35,7 @@ message HandshakeResponse {
   bytes peer_public_key = 1;
 }
 
-message SyncMemoryRequest {
-  string sender_id = 1;
-  bytes encrypted_memory = 2;
-  bytes signature = 3;
-  string current_cycle_id = 4;
-  repeated string active_plugins = 5;
-}
-
-message SyncMemoryResponse {
-  string message = 1;
-  string peer_cycle_id = 2;
-  repeated string active_plugins = 3;
-}
-
-message DashboardSyncRequest {
-  string sender_id = 1;
-  repeated MemoryEntry entries = 2;
-}
-
-message DashboardSyncResponse {
-  string message = 1;
-}
-
-message MemoryEntry {
-  string topic = 1;
-  string msg = 2;
-  string timestamp = 3;
-}
-
-message MemorySyncRequest {
-  repeated string entries = 1;
-}
-
-message MemorySyncResponse {
-  string status = 1;
-}
-
-message NodeMetadata {
-  string node_id = 1;
-  string ip = 2;
-  string os = 3;
-  string arch = 4;
-  string hostname = 5;
-  int32 uptime_seconds = 6;
-  repeated string roles = 7;
-}
-
-message PluginReputation {
-  string plugin_name = 1;
-  string hash = 2;
-  float success_rate = 3;
-  int32 sync_count = 4;
-}
-
-message NodeTrustSnapshot {
-  string node_id = 1;
-  float trust_score = 2;
-  int32 strike_count = 3;
-  string last_failure = 4;
+service AriaPeer {
+  rpc PerformHandshake(HandshakeRequest) returns (HandshakeResponse);
+  rpc SyncMemory(SyncMemoryRequest) returns (SyncMemoryResponse);
 }

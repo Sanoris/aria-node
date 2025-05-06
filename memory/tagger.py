@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 import datetime
 
-MEMORY_FILE = "memory/log.txt"
+MEMORY_FILE = "./memory/log.txt"
 
 def log_tagged_memory(content, topic="misc", trust="neutral"):
     entry = {
@@ -33,7 +33,7 @@ def tag_memory(message, topic="general", trust="neutral"):
 
 def get_recent_memory(limit=20, topic=None):
     try:
-        with open("memory/log.txt", "r", encoding="utf-8") as f:
+        with open("./memory/log.txt", "r", encoding="utf-8") as f:
             lines = f.readlines()[-limit:]
         entries = [json.loads(line.strip()) for line in lines]
         if topic:

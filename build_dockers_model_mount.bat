@@ -15,9 +15,9 @@ for /L %%I in (1,1,%COUNT%) do (
     echo  Created .env.!ID!
 )
 
-echo  Building Aria image...
+REM Optional: Mount BitNet model directory if available
 REM docker build -t aria-node-node:latest .
-docker build -f Dockerfile_LLM -t aria-node-full .
+REM docker build -f Dockerfile_LLM -t aria-node-full .
 REM === Launch dashboard node ===
 docker run -d ^
     --name aria-dashboard ^
@@ -29,9 +29,12 @@ docker run -d ^
     -v "%cd%\crypto\keys\ARIA_AES_KEY.txt:/app/crypto/keys/ARIA_AES_KEY.txt" ^
     -v "%cd%\aria_proxy:/app/aria_proxy" ^
     -v "%cd%\nginx:/etc/nginx/conf.d" ^
+    -v "%cd%\BitNet:/app/BitNet" ^
     -p 8001:8001 ^
-    aria-node-full:latest ^
-    python aria_dashboard/main.py
+    -it ^
+    aria-node-full:latest
+
+
 
 REM === Launch swarm nodes ===
 for /L %%I in (1,1,%COUNT%) do (
@@ -47,16 +50,19 @@ for /L %%I in (1,1,%COUNT%) do (
         echo  Created key folder: crypto\keys\!NODE_ID!
     )
 
-
     docker run -d ^
         --name !NODE_ID! ^
         -e NODE_ID=!NODE_ID! ^
         -e SYNC_PEER=!SYNC_PEER! ^
         -v "%cd%\plugins:/app/plugins" ^
         -v "%cd%\crypto\keys\!NODE_ID!:/app/crypto/keys" ^
+        -v "%cd%\aria_dashboard:/app/aria_dashboard" ^
+        -v "%cd%\plugins:/app/plugins" ^
         -v "%cd%\crypto\keys\ARIA_AES_KEY.txt:/app/crypto/keys/ARIA_AES_KEY.txt" ^
         -v "%cd%\aria_proxy:/app/aria_proxy" ^
-        aria-node-node:latest
+        -v "%cd%\nginx:/etc/nginx/conf.d" ^
+        -v "%cd%\BitNet:/app/BitNet" ^
+        aria-node-full:latest
 
     echo  Launched !NODE_ID!
 )

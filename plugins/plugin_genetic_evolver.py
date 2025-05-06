@@ -1,62 +1,68 @@
-# plugin_genetic_evolver.py
-import random
-import importlib.util
 import os
-import shutil
+import random
+import base64
+from pathlib import Path
+from memory.tagger import log_tagged_memory
 
-PLUGIN_DIR = "plugins"
-GENERATIONS = 10
-POPULATION_SIZE = 5
-MUTATION_RATE = 0.2
+TRIGGER = {
+    "type": "scheduled",
+    "interval": 900  # Every 15 minutes
+}
 
-def list_plugins():
-    return [f for f in os.listdir(PLUGIN_DIR) if f.startswith("plugin_") and f.endswith(".py")]
-
-def load_plugin_code(filename):
-    with open(os.path.join(PLUGIN_DIR, filename), "r") as f:
+def load_plugin_code(plugin_path):
+    with open(plugin_path, "r", encoding="utf-8") as f:
         return f.read()
 
+def crossover_code(code1, code2):
+    split1 = code1.splitlines()
+    split2 = code2.splitlines()
+    pivot = min(len(split1), len(split2)) // 2
+    return "\n".join(split1[:pivot] + split2[pivot:])
+
 def mutate_code(code):
-    lines = code.split("\n")
-    if lines and random.random() < MUTATION_RATE:
-        i = random.randint(0, len(lines) - 1)
-        lines[i] = "# Mutated: " + lines[i]
+    lines = code.splitlines()
+    if lines:
+        idx = random.randint(0, len(lines) - 1)
+        lines[idx] = "# mutation: " + lines[idx]
     return "\n".join(lines)
 
-def crossover_code(code1, code2):
-    lines1 = code1.split("\n")
-    lines2 = code2.split("\n")
-    cut = random.randint(1, min(len(lines1), len(lines2)) - 1)
-    return "\n".join(lines1[:cut] + lines2[cut:])
+def ensure_minimum_structure(code):
+    if "TRIGGER" not in code:
+        code = 'TRIGGER = {"type": "scheduled", "interval": 600}\n\n' + code
+    if "def run():" not in code:
+        code += '\n\ndef run():\n    from memory.tagger import log_tagged_memory\n    log_tagged_memory("Evolved plugin executed.", topic="plugin", trust="neutral")\n'
+    return code
 
-def evaluate_fitness(filename):
-    # Placeholder: fitness = file length (stand-in for real-world performance metrics)
-    return len(load_plugin_code(filename))
+def fitness(plugin_name):
+    from memory.tagger import get_recent_memory
+    memory = get_recent_memory(limit=300)
+    success = sum(1 for e in memory if e["topic"] == "fitness" and plugin_name in e.get("content", "") and e["trust"] == "high")
+    failure = sum(1 for e in memory if e["topic"] == "fitness" and plugin_name in e.get("content", "") and e["trust"] == "low")
+    return success - (2 * failure)
 
 def evolve_plugins():
-    plugins = list_plugins()
-    if len(plugins) < 2:
-        print("Not enough plugins to evolve.")
+    plugin_dir = Path("plugins")
+    base_plugins = [f for f in plugin_dir.glob("plugin_*.py") if "evolver" not in f.name]
+
+    if len(base_plugins) < 2:
         return
 
-    for generation in range(GENERATIONS):
-        print(f"Generation {generation+1}")
+    scored = [(load_plugin_code(p), p.name) for p in base_plugins]
+    scored.sort(key=lambda x: fitness(x[1]), reverse=True)
 
-        population = random.sample(plugins, min(POPULATION_SIZE, len(plugins)))
-        fitness_scores = [(plugin, evaluate_fitness(plugin)) for plugin in population]
-        fitness_scores.sort(key=lambda x: x[1], reverse=True)
+    plugin1, plugin2 = scored[0][1], scored[1][1]
+    code1, code2 = scored[0][0], scored[1][0]
 
-        parent1, parent2 = fitness_scores[0][0], fitness_scores[1][0]
-        code1 = load_plugin_code(parent1)
-        code2 = load_plugin_code(parent2)
+    new_code = crossover_code(code1, code2)
+    new_code = mutate_code(new_code)
+    new_code = ensure_minimum_structure(new_code)
+    genome_info = f"# GENOME: parents={plugin1} + {plugin2}; mutated=True\n"
+    new_code = genome_info + new_code
 
-        new_code = crossover_code(code1, code2)
-        new_code = mutate_code(new_code)
+    count = len([f for f in plugin_dir.glob("plugin_evolved_*.py")])
+    new_path = plugin_dir / f"plugin_evolved_{count+1}.py"
+    new_path.write_text(new_code, encoding="utf-8")
+    log_tagged_memory(f"Evolved new plugin: {new_path.name}", topic="plugin", trust="high")
 
-        new_plugin_name = f"plugin_evolved_{generation+1}.py"
-        with open(os.path.join(PLUGIN_DIR, new_plugin_name), "w") as f:
-            f.write(new_code)
-        print(f"Created {new_plugin_name}")
-
-if __name__ == "__main__":
+def run():
     evolve_plugins()

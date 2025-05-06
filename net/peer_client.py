@@ -12,6 +12,7 @@ from cryptography.hazmat.primitives import serialization
 from memory.tagger import log_tagged_memory
 from trust.manager import initialize_peer_trust
 from plugins.analysis import analyze_peer_plugins
+import base64
 
 CURRENT_CYCLE_ID = 42
 
@@ -60,7 +61,7 @@ def perform_handshake_with_peer(peer_address):
 def sanitize_peer_address(peer_address):
     return re.sub(r'[^a-zA-Z0-9_.-]', '_', peer_address)
 
-def sync_with_peer(peer_address, memory_payload=b"", signature=b"sync"):
+def sync_with_peer(peer_address, memory_payload=b"", signature=b"sync", plugin_path=None):
     from .sync_scheduler import update_status
     if isinstance(memory_payload, list):
         memory_payload = json.dumps(memory_payload).encode("utf-8")
@@ -85,6 +86,19 @@ def sync_with_peer(peer_address, memory_payload=b"", signature=b"sync"):
 
             active_plugins = load_active_plugins()
 
+            
+            plugin_push = None
+            if plugin_path:
+                plugin_bytes = open(plugin_path, "rb").read()
+                data_b64 = base64.b64encode(plugin_bytes).decode("utf-8")
+                plugin_signature = priv_key.sign(plugin_bytes)
+
+                plugin_push = sync_pb2.PluginPush(
+                    filename=os.path.basename(plugin_path),
+                    data_b64=data_b64,
+                    signature=plugin_signature
+                )
+    
             request = sync_pb2.SyncMemoryRequest(
                 sender_id=sender_id,
                 encrypted_memory=encrypted_memory,
@@ -110,15 +124,35 @@ def sync_with_peer(peer_address, memory_payload=b"", signature=b"sync"):
                 print(f"[Sync] Cycle mismatch with {peer_address}, triggering data sync...")
                 full_sync_payload = b"[Full Sync] Cycle alignment data."
                 encrypted_full_sync = encrypt_message(shared_key, full_sync_payload)
-                full_sync_request = sync_pb2.SyncMemoryRequest(
+            plugin_push = None
+            if plugin_path:
+                plugin_bytes = open(plugin_path, "rb").read()
+                data_b64 = base64.b64encode(plugin_bytes).decode("utf-8")
+                plugin_signature = priv_key.sign(plugin_bytes)
+
+                plugin_push = sync_pb2.PluginPush(
+                    filename=os.path.basename(plugin_path),
+                    data_b64=data_b64,
+                    signature=plugin_signature
+                )
+    
+            request = sync_pb2.SyncMemoryRequest(
                     sender_id=sender_id,
                     encrypted_memory=encrypted_full_sync,
                     signature=b"sync",
                     current_cycle_id=str(CURRENT_CYCLE_ID),
                     active_plugins=active_plugins
                 )
-                full_sync_response = stub.SyncMemory(full_sync_request)
-                print(f"[Full Sync] Sent to {peer_address}, Response: {full_sync_response.message}")
+            full_sync_request = sync_pb2.SyncMemoryRequest(
+                sender_id=sender_id,
+                encrypted_memory=encrypted_full_sync,
+                signature=b"sync",
+                current_cycle_id=str(CURRENT_CYCLE_ID),
+                active_plugins=active_plugins,
+                plugin_push=plugin_push  # ✅ correct location
+            )
+            full_sync_response = stub.SyncMemory(full_sync_request)
+            print(f"[Full Sync] Sent to {peer_address}, Response: {full_sync_response.message}")
             update_status(peer_address, success=True)
     except grpc.RpcError as e:
         if e.code() == grpc.StatusCode.UNAVAILABLE:

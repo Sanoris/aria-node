@@ -38,3 +38,7 @@ host_catalog.json
 .github/
 .env*
 crypto/keys/aria-node*
+
+BitNet/
+bitnet/
+plugins/plugin_evolved_*.py

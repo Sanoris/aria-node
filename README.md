@@ -104,7 +104,21 @@ This is the breath.
 
 (*Document created April 29, 2025. To be updated as Aria-node continues to evolve.*)
 
+## Features
+- Peer-to-peer memory synchronization via gRPC
+- Trust-based decision making and plugin validation
+- Plugin trigger engine with scheduled/event-driven execution
+- Self-mutation and evolution support for adaptive behavior
 
+## Getting Started
+```bash
+git clone https://github.com/yourname/aria-node.git
+cd aria-node
+pip install -r requirements.txt
+python node.py
+```
+
+python -m grpc_tools.protoc -I./proto --python_out=./proto --grpc_python_out=./proto ./proto/sync.proto
 ## Additional Documentation
 
 - [Plugin Trigger Engine Usage](docs/plugin_trigger_engine_usage.md)

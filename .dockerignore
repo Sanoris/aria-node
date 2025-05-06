@@ -54,3 +54,8 @@ recon/shodan_key.txt
 *.pem
 *.zip
 *.log
+*.exe
+build/
+*.exe
+*.vcxproj*
+CMakeCache.txt
