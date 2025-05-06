@@ -61,7 +61,7 @@ def perform_handshake_with_peer(peer_address):
 def sanitize_peer_address(peer_address):
     return re.sub(r'[^a-zA-Z0-9_.-]', '_', peer_address)
 
-def sync_with_peer(peer_address, memory_payload=b"", signature=b"sync", plugin_path=None):
+def sync_with_peer(peer_address, memory_payload=b"", signature=b"sync", plugin_path=None, plugin_push=None):
     from .sync_scheduler import update_status
     if isinstance(memory_payload, list):
         memory_payload = json.dumps(memory_payload).encode("utf-8")
@@ -86,31 +86,28 @@ def sync_with_peer(peer_address, memory_payload=b"", signature=b"sync", plugin_p
 
             active_plugins = load_active_plugins()
 
-            
-            plugin_push = None
-            if plugin_path:
+            if plugin_path and not plugin_push:
                 plugin_bytes = open(plugin_path, "rb").read()
                 data_b64 = base64.b64encode(plugin_bytes).decode("utf-8")
                 plugin_signature = priv_key.sign(plugin_bytes)
-
                 plugin_push = sync_pb2.PluginPush(
                     filename=os.path.basename(plugin_path),
                     data_b64=data_b64,
                     signature=plugin_signature
                 )
-    
+
             request = sync_pb2.SyncMemoryRequest(
                 sender_id=sender_id,
                 encrypted_memory=encrypted_memory,
                 signature=signature,
                 current_cycle_id=str(CURRENT_CYCLE_ID),
-                active_plugins=active_plugins
+                active_plugins=active_plugins,
+                plugin_push=plugin_push
             )
             response = stub.SyncMemory(request)
 
             print(f"[Sync] Peer: {peer_address}, Response: {response.message}, Peer Cycle: {response.peer_cycle_id}")
 
-            # ✅ Plugin validation (if active_plugins returned)
             if hasattr(response, "active_plugins"):
                 if not analyze_peer_plugins(response.active_plugins):
                     log_tagged_memory(
@@ -121,38 +118,23 @@ def sync_with_peer(peer_address, memory_payload=b"", signature=b"sync", plugin_p
                     return
 
             if response.peer_cycle_id != str(CURRENT_CYCLE_ID):
-                print(f"[Sync] Cycle mismatch with {peer_address}, triggering data sync...")
-                full_sync_payload = b"[Full Sync] Cycle alignment data."
-                encrypted_full_sync = encrypt_message(shared_key, full_sync_payload)
-            plugin_push = None
-            if plugin_path:
-                plugin_bytes = open(plugin_path, "rb").read()
-                data_b64 = base64.b64encode(plugin_bytes).decode("utf-8")
-                plugin_signature = priv_key.sign(plugin_bytes)
+                try:
+                    print(f"[Sync] Cycle mismatch with {peer_address}, triggering data sync...")
+                    full_sync_payload = b"[Full Sync] Cycle alignment data."
+                    encrypted_full_sync = encrypt_message(shared_key, full_sync_payload)
+                    full_sync_request = sync_pb2.SyncMemoryRequest(
+                        sender_id=sender_id,
+                        encrypted_memory=encrypted_full_sync,
+                        signature=b"sync",
+                        current_cycle_id=str(CURRENT_CYCLE_ID),
+                        active_plugins=active_plugins,
+                        plugin_push=plugin_push
+                    )
+                    full_sync_response = stub.SyncMemory(full_sync_request)
+                    print(f"[Full Sync] Sent to {peer_address}, Response: {full_sync_response.message}")
+                except Exception as e:
+                    log_tagged_memory(f"Full sync with {peer_address} failed: {e}", topic="sync", trust="low")
 
-                plugin_push = sync_pb2.PluginPush(
-                    filename=os.path.basename(plugin_path),
-                    data_b64=data_b64,
-                    signature=plugin_signature
-                )
-    
-            request = sync_pb2.SyncMemoryRequest(
-                    sender_id=sender_id,
-                    encrypted_memory=encrypted_full_sync,
-                    signature=b"sync",
-                    current_cycle_id=str(CURRENT_CYCLE_ID),
-                    active_plugins=active_plugins
-                )
-            full_sync_request = sync_pb2.SyncMemoryRequest(
-                sender_id=sender_id,
-                encrypted_memory=encrypted_full_sync,
-                signature=b"sync",
-                current_cycle_id=str(CURRENT_CYCLE_ID),
-                active_plugins=active_plugins,
-                plugin_push=plugin_push  # ✅ correct location
-            )
-            full_sync_response = stub.SyncMemory(full_sync_request)
-            print(f"[Full Sync] Sent to {peer_address}, Response: {full_sync_response.message}")
             update_status(peer_address, success=True)
     except grpc.RpcError as e:
         if e.code() == grpc.StatusCode.UNAVAILABLE:

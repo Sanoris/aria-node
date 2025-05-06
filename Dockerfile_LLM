@@ -52,14 +52,14 @@ RUN pip install -r ./requirements.txt
 COPY ./BitNet /app/BitNet
 
 # Install Python deps for BitNet
-RUN pip install --no-cache-dir -r ./BitNet/requirements.txt
+#RUN pip install --no-cache-dir -r ./BitNet/requirements.txt
 
 # Create app directory
-WORKDIR /app/BitNet
-RUN rm -rf build && mkdir build && cd build && cmake .. && make
+#WORKDIR /app/BitNet
+#RUN rm -rf build && mkdir build && cd build && cmake .. && make
 WORKDIR /app
 # Optionally build the project inside Docker (comment out if doing manually)
-RUN python ./BitNet/setup_env.py -md ./BitNet/models/BitNet-b1.58-2B-4T -q i2_s || echo "Setup failed — model files may be missing. Mount and retry if needed."
+#RUN python ./BitNet/setup_env.py -md ./BitNet/models/BitNet-b1.58-2B-4T -q i2_s || echo "Setup failed — model files may be missing. Mount and retry if needed."
 
 # Set PYTHONPATH
 ENV PYTHONPATH=/app/BitNet:/app

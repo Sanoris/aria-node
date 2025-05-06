@@ -18,14 +18,32 @@ import random
 MEMORY_FILE = "memory/log.txt"
 PEER_LOGS = ["memory/log.txt"]  # can be updated to include peer files
 
-
 def background_decay():
     while True:
         decay_memory()
         time.sleep(3600)
 
+
 def background_plugins():
-    start_plugins()  # Trigger engine handles its own scheduling
+    from net.plugin_trigger_engine import start_plugins
+    try:
+        start_plugins()
+    except Exception as e:
+        from memory.tagger import log_tagged_memory
+        import traceback
+        log_tagged_memory(f"[plugin_thread] Plugin engine crashed: {e}", topic="plugin", trust="low")
+        traceback.print_exc()
+        import time
+        while True:
+            log_tagged_memory("[plugin_thread] Sleeping after crash. Auto-retry pending.", topic="plugin", trust="low")
+            time.sleep(60)
+            try:
+                start_plugins()
+                break
+            except Exception as e:
+                log_tagged_memory(f"[plugin_thread] Retry failed: {e}", topic="plugin", trust="low")
+                traceback.print_exc()
+      # Trigger engine handles its own scheduling
 
 def background_sync():
     while True:
@@ -48,16 +66,6 @@ def background_infiltration():
             attempt_infiltration()
         time.sleep(600)
 
-def load_peers_from_status(file="peer_status.json"):
-    try:
-        with open(file, "r") as f:
-            data = json.load(f)
-        # Filter for peers with low failure count or recent seen time
-        return [ip for ip, meta in data.items() if meta.get("failures", 99) < 99999]
-    except Exception as e:
-        print(f"[!] Failed to load peer list: {e}")
-        return ["127.0.0.1"]
-    
 def background_assign_tasks():
     while True:
         peers = load_peers_from_status()
@@ -95,5 +103,15 @@ def safe_serve():
             f.write(f"Exception: {e}\\n")
         print(f"[!] Failed to start server: {e}")
 
+def load_peers_from_status(file="peer_status.json"):
+    try:
+        with open(file, "r") as f:
+            data = json.load(f)
+        # Filter for peers with low failure count or recent seen time
+        return [ip for ip, meta in data.items() if meta.get("failures", 99) < 99999]
+    except Exception as e:
+        print(f"[!] Failed to load peer list: {e}")
+        return ["127.0.0.1"]
+    
 if __name__ == "__main__":
     start_all()

@@ -8,22 +8,34 @@ from cryptography.hazmat.primitives import serialization
 
 PLUGINS_DIR = Path("plugins")
 
+
 def load_plugins():
+    import shutil
     plugins = []
     for plugin_file in PLUGINS_DIR.glob("plugin_*.py"):
-        spec = importlib.util.spec_from_file_location(plugin_file.stem, plugin_file)
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
-        plugins.append(mod)
+        try:
+            spec = importlib.util.spec_from_file_location(plugin_file.stem, plugin_file)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            plugins.append(mod)
+        except Exception as e:
+            from memory.tagger import log_tagged_memory
+            quarantine_dir = PLUGINS_DIR.parent / "quarantine"
+            quarantine_dir.mkdir(exist_ok=True)
+            quarantined_path = quarantine_dir / plugin_file.name
+            try:
+                shutil.move(str(plugin_file), str(quarantined_path))
+                log_tagged_memory(f"Quarantined broken plugin {plugin_file.name}: {e}", topic="plugin", trust="low")
+            except Exception as move_err:
+                log_tagged_memory(f"Failed to quarantine {plugin_file.name}: {move_err}", topic="plugin", trust="low")
     return plugins
+
 
 def scheduled_runner(plugin, interval):
     while True:
         try:
             plugin.run()
-            log_tagged_memory(f"Plugin {plugin.__name__} ran successfully", topic="fitness", trust="high")
         except Exception as e:
-            log_tagged_memory(f"Plugin {plugin.__name__} crashed: {e}", topic="fitness", trust="low")
             log_tagged_memory(f"Error in plugin {plugin.__name__}: {e}", topic="plugin", trust="low")
         time.sleep(interval)
 
@@ -44,10 +56,8 @@ def event_watcher(plugin, match_dict):
             if entry_matches(entry.get("content", {}), match_dict) or entry_matches(entry, match_dict):
                 try:
                     plugin.run()
-                    log_tagged_memory(f"Plugin {plugin.__name__} ran successfully", topic="fitness", trust="high")
                     log_tagged_memory(f"Triggered plugin {plugin.__name__} on event match", topic="plugin", trust="high")
                 except Exception as e:
-                    log_tagged_memory(f"Plugin {plugin.__name__} crashed: {e}", topic="fitness", trust="low")
                     log_tagged_memory(f"Event plugin {plugin.__name__} error: {e}", topic="plugin", trust="low")
         if recent_entries:
             last_seen_timestamp = recent_entries[-1].get("timestamp")
@@ -66,10 +76,8 @@ def start_plugins():
         elif ttype == "passive":
             try:
                 plugin.run()
-                log_tagged_memory(f"Plugin {plugin.__name__} ran successfully", topic="fitness", trust="high")
                 log_tagged_memory(f"Started passive plugin {plugin.__name__}", topic="plugin", trust="high")
             except Exception as e:
-                log_tagged_memory(f"Plugin {plugin.__name__} crashed: {e}", topic="fitness", trust="low")
                 log_tagged_memory(f"Passive plugin {plugin.__name__} error: {e}", topic="plugin", trust="low")
         elif ttype == "event":
             match_dict = trigger.get("match", {})
@@ -83,12 +91,9 @@ def run_plugins_by_trigger(trigger):
         if plugin.__name__ == trigger:
             try:
                 plugin.run()
-                log_tagged_memory(f"Plugin {plugin.__name__} ran successfully", topic="fitness", trust="high")
                 print(f"[⚡] Triggered plugin: {trigger}")
             except Exception as e:
-                log_tagged_memory(f"Plugin {plugin.__name__} crashed: {e}", topic="fitness", trust="low")
                 print(f"[!] Plugin {trigger} failed: {e}")
-
 
 def receive_and_write_plugin(filename, data_b64, signature):
     try:
