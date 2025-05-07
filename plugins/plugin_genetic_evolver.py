@@ -4,7 +4,7 @@ import random
 import subprocess
 from pathlib import Path
 from memory.tagger import log_tagged_memory
-from BitNet.run_inference import generate
+from inference.inference_worker import InferenceWorker
 
 
 TRIGGER = {
@@ -50,7 +50,7 @@ def fitness(plugin_name):
 def llm_mutate_code(code, plugin1, plugin2):
     prompt = f"Mutate this Python plugin to change its behavior, improve its logic, or introduce useful variation. Preserve the 'run()' function.\n\n[START OF CODE]\n{code}\n[END OF CODE]"
     try:
-        response = generate(prompt, n_predict=512, temperature=0.7)
+        response = generate(prompt)
         if not response.strip():
             raise ValueError("BitNet response was empty")
         lines = response.splitlines()

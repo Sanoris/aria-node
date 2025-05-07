@@ -1,58 +1,41 @@
 from memory.tagger import get_recent_memory, log_tagged_memory
-from BitNet.run_inference import generate  # assumes generate(prompt) returns LLM output
+from inference.inference_worker import InferenceWorker
+import hashlib
+from memory.vector_logger import log_vector_record
+from trust.manager import endorse_peer
 
 TRIGGER = {
-    "type": "event",
-    "match": {"AAAAAAAAAAA": "AAAAAAAAAAAAAAAAAAAA"}
+    "type": "scheduled",
+    "interval": 120
 }
 
-def extract_context(subject):
-    logs = get_recent_memory(limit=100)
-    plugin_logs = []
-    trust_logs = []
-    for entry in logs:
-        content = entry.get("content", "")
-        topic = entry.get("topic", "")
-        if subject in content:
-            if topic == "plugin":
-                plugin_logs.append(content)
-            elif topic == "trust":
-                trust_logs.append(content)
-    return plugin_logs[-5:], trust_logs[-5:]
+def handle_result(prompt, output, vector):
+    decision = output.lower()
+    if "yes" in decision:
+        vote = "yes"
+    elif "no" in decision:
+        vote = "no"
+    else:
+        vote = "abstain"
+
+    log_tagged_memory(f"VOTE {vote.upper()} — {output}", topic="decision", trust="inferred")
+
+    # optional: fingerprint proposer from prompt if included
+    if "Proposing decision:" in prompt:
+        try:
+            raw = prompt.split("Proposing decision:")[1].split(":")[0]
+            proposer = raw.strip()
+            if vote == "yes":
+                endorse_peer(proposer, reason=f"Auto-voted yes for: {prompt}")
+        except Exception as e:
+            log_tagged_memory(f"[vote_plugin] Could not parse proposer: {e}", topic="decision", trust="low")
 
 def run():
-    recent = get_recent_memory(limit=100)
-    for entry in recent:
+    memories = get_recent_memory(limit=10)
+    for entry in memories:
         content = entry.get("content", "")
+        if isinstance(content, dict):
+            content = str(content)
         if "Proposing decision:" in content:
-            try:
-                _, decision = content.split("Proposing decision:", 1)
-                topic = decision.strip()
-                subject, action = topic.split(":")
-
-                plugin_logs, trust_logs = extract_context(subject)
-
-                prompt = f"""
-Decision topic: {topic}
-
-Recent plugin logs:
-{chr(10).join(plugin_logs)}
-
-Recent trust-related logs:
-{chr(10).join(trust_logs)}
-
-Should we vote YES, NO, or ABSTAIN? Respond with a one-line justification.
-"""
-
-                result = generate(prompt)
-                response = result.strip().lower()
-
-                if "yes" in response:
-                    log_tagged_memory(f"VOTE yes for {topic} — {result}", topic="decision", trust="high")
-                elif "no" in response:
-                    log_tagged_memory(f"VOTE no for {topic} — {result}", topic="decision", trust="low")
-                else:
-                    log_tagged_memory(f"VOTE abstain for {topic} — {result}", topic="decision", trust="neutral")
-
-            except Exception as e:
-                log_tagged_memory(f"LLM auto-vote failed: {e}", topic="decision", trust="low")
+            prompt = f"User: {content.strip()}\\nAssistant: Vote yes, no, or abstain with reasoning:"
+            InferenceWorker.get().enqueue(prompt, callback=handle_result)

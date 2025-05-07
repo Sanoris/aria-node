@@ -42,3 +42,4 @@ crypto/keys/aria-node*
 BitNet/
 bitnet/
 plugins/plugin_evolved_*.py
+aria_soul.json

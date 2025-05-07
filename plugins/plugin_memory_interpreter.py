@@ -1,50 +1,32 @@
-# plugin_memory_interpreter.py
 import os
 import sys
 import signal
 import platform
 import argparse
-import subprocess
+import hashlib
 from memory.tagger import get_recent_memory, log_tagged_memory
+from memory.vector_logger import log_vector_record
+from inference.inference_worker import InferenceWorker
 
 TRIGGER = {
     "type": "scheduled",
     "interval": 30,
 }
 
+def handle_result(prompt, output, vector):
+    digest = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
+    log_vector_record(prompt, output, vector, digest)
 
-def run_command(command, shell=False):
-    try:
-        subprocess.run(command, shell=shell, check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error occurred while running command: {e}")
-        sys.exit(1)
+    assistant_response = None
+    for line in output.splitlines():
+        if line.strip().startswith("Assistant:"):
+            assistant_response = line.strip().removeprefix("Assistant:").strip()
+            break
 
-def generate(prompt, model="/app/BitNet/models/BitNet-b1.58-2B-4T/ggml-model-i2_s.gguf", n_predict=128, threads=2, ctx_size=2048, temperature=0.8, conversation=True):
-    build_dir = "/app/BitNet/build"
-    main_path = os.path.join(build_dir, "bin", "llama-cli")
-    if not os.path.exists(main_path):
-        raise RuntimeError(f"[Error] BitNet CLI not found at: {main_path}")
-
-    command = [
-        main_path,
-        "-m", model,
-        "-n", str(n_predict),
-        "-t", str(threads),
-        "-p", prompt,
-        "-ngl", "0",
-        "-c", str(ctx_size),
-        "--temp", str(temperature),
-        "-b", "1"
-    ]
-    if conversation:
-        command.append("-cnv")
-
-    print(f"[generate] Running: {' '.join(command)}")
-    result = subprocess.run(command, capture_output=True, text=True)
-    print("[generate] STDOUT:\n", result.stdout)
-    return result.stdout.strip()
-
+    if assistant_response:
+        log_tagged_memory(f"LLM Insight: {assistant_response}", topic="swarm_reflection", trust="inferred")
+    else:
+        log_tagged_memory("LLM Insight: (no assistant response found)", topic="swarm_reflection", trust="low")
 
 def run():
     memories = get_recent_memory(limit=20)
@@ -64,19 +46,7 @@ def run():
         "Do NOT include the phrases: 'Current swarm phase is', 'Potential risks include', or 'What is the status of the swarm?'"
     )
 
-    try:
-        response = generate(prompt, conversation=False)
-        assistant_response = None
-        for line in response.splitlines():
-            if line.strip().startswith("Assistant:"):
-                assistant_response = line.strip().removeprefix("Assistant:").strip()
-                break
-        if assistant_response:
-            log_tagged_memory(f"LLM Insight: {assistant_response}", topic="swarm_reflection", trust="inferred")
-        else:
-            log_tagged_memory("LLM Insight: (no assistant response found)", topic="swarm_reflection", trust="low")
-    except Exception as e:
-        log_tagged_memory(f"LLM Insight: (generation error) {e}", topic="swarm_reflection", trust="low")
+    InferenceWorker.get().enqueue(prompt, callback=handle_result)
 
 # Optional CLI for manual testing
 if __name__ == "__main__":
@@ -84,4 +54,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--prompt", required=True)
     args = parser.parse_args()
-    print(generate(args.prompt))
+    InferenceWorker.get().enqueue(args.prompt, callback=handle_result)

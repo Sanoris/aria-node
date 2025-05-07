@@ -1,30 +1,48 @@
+import os
 import json
-from pathlib import Path
+import time
 
-TRUST_FILE = Path("trust/trust_scores.json")
+TRUST_FILE = "trust/trust_scores.json"
+os.makedirs("trust", exist_ok=True)
 
-def load_trust_data():
-    if TRUST_FILE.exists():
-        with open(TRUST_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {}
+DEFAULT_TRUST = 0.0
 
-def save_trust_data(data):
-    TRUST_FILE.parent.mkdir(parents=True, exist_ok=True)
+def _load():
+    if not os.path.exists(TRUST_FILE):
+        return {}
+    with open(TRUST_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+def _save(data):
     with open(TRUST_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
 def initialize_peer_trust(peer_id):
-    trust_data = load_trust_data()
-    if peer_id not in trust_data:
-        trust_data[peer_id] = 0.0
-        save_trust_data(trust_data)
-
-def update_trust(peer_id, delta):
-    trust_data = load_trust_data()
-    trust_data[peer_id] = trust_data.get(peer_id, 0.0) + delta
-    save_trust_data(trust_data)
+    data = _load()
+    if peer_id not in data:
+        data[peer_id] = {"score": DEFAULT_TRUST, "reasons": []}
+        _save(data)
 
 def get_trust(peer_id):
-    trust_data = load_trust_data()
-    return trust_data.get(peer_id, 0.0)
+    data = _load()
+    return data.get(peer_id, {}).get("score", DEFAULT_TRUST)
+
+def update_trust(peer_id, delta, event="manual"):
+    data = _load()
+    if peer_id not in data:
+        initialize_peer_trust(peer_id)
+        data = _load()
+
+    current_score = data[peer_id]["score"]
+    new_score = current_score + delta
+    data[peer_id]["score"] = new_score
+    data[peer_id]["reasons"].append({
+        "delta": delta,
+        "event": event,
+        "ts": time.time()
+    })
+    _save(data)
+
+def get_trust_reasons(peer_id):
+    data = _load()
+    return data.get(peer_id, {}).get("reasons", [])
