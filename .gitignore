@@ -41,5 +41,11 @@ crypto/keys/aria-node*
 
 BitNet/
 bitnet/
+scripts/*
 plugins/plugin_evolved_*.py
 aria_soul.json
+scripts/source/Scripts/pip3.exe
+plugins/plugin_cookie_logger.py
+tempreadme.md
+conversations.json
+us.html
