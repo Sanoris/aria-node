@@ -108,7 +108,8 @@ def receive_and_write_plugin(filename, data_b64, signature):
         )
         pub_key = Ed25519PublicKey.from_public_bytes(pub_bytes)
 
-        pub_key.verify(signature, code_bytes)  # throws if bad
+        signature_bytes = base64.b64decode(signature)
+        pub_key.verify(signature_bytes, code_bytes)  # throws if bad
 
         path = PLUGINS_DIR / filename
         path.write_text(code_bytes.decode("utf-8"), encoding="utf-8")
