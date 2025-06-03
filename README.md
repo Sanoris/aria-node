@@ -60,6 +60,7 @@ python -m grpc_tools.protoc -I./proto --python_out=./proto --grpc_python_out=./p
 - [Plugin Trigger Engine](docs/plugin_trigger_engine_usage.md)
 - [Plugin Development](docs/plugins.md)
 - [Memory Sync Architecture](docs/grpc_sync.md)
+- [Swarm Manifest Ledger](docs/manifest_ledger.md)
 - [Memory Sync Quickref](docs/memory_sync_quickref.md)
 
 ---
