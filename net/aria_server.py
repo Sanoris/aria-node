@@ -23,7 +23,8 @@ class AriaPeerServicer(sync_pb2_grpc.AriaPeerServicer):
             from net.plugin_trigger_engine import receive_and_write_plugin
             receive_and_write_plugin(
                 request.plugin_push.filename,
-                request.plugin_push.data_b64
+                request.plugin_push.data_b64,
+                request.plugin_push.signature.encode("utf-8") if isinstance(request.plugin_push.signature, str) else request.plugin_push.signature
             )
     
         return sync_pb2.SyncMemoryResponse(
