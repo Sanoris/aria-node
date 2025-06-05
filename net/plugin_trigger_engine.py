@@ -12,22 +12,70 @@ PLUGINS_DIR = Path("plugins")
 def load_plugins():
     import shutil
     plugins = []
+    quarantine_dir = PLUGINS_DIR.parent / "quarantine"
+    quarantine_dir.mkdir(exist_ok=True)
     for plugin_file in PLUGINS_DIR.glob("plugin_*.py"):
         try:
             spec = importlib.util.spec_from_file_location(plugin_file.stem, plugin_file)
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
+
+            # verify run() exists
+            if not hasattr(mod, "run") or not callable(getattr(mod, "run")):
+                quarantined_path = quarantine_dir / plugin_file.name
+                try:
+                    shutil.move(str(plugin_file), str(quarantined_path))
+                    log_tagged_memory(
+                        f"Quarantined plugin {plugin_file.name}: missing run()",
+                        topic="plugin",
+                        trust="low",
+                    )
+                except Exception as move_err:
+                    log_tagged_memory(
+                        f"Failed to quarantine {plugin_file.name}: {move_err}",
+                        topic="plugin",
+                        trust="low",
+                    )
+                continue
+
+            # validate trigger
+            trigger = getattr(mod, "TRIGGER", {})
+            ttype = trigger.get("type")
+            if ttype not in {"scheduled", "event", "passive"}:
+                log_tagged_memory(
+                    f"Malformed TRIGGER in {plugin_file.name}: unknown type {ttype}",
+                    topic="plugin",
+                    trust="low",
+                )
+            elif ttype == "scheduled" and "interval" not in trigger:
+                log_tagged_memory(
+                    f"Malformed TRIGGER in {plugin_file.name}: missing 'interval'",
+                    topic="plugin",
+                    trust="low",
+                )
+            elif ttype == "event" and "match" not in trigger:
+                log_tagged_memory(
+                    f"Malformed TRIGGER in {plugin_file.name}: missing 'match'",
+                    topic="plugin",
+                    trust="low",
+                )
+
             plugins.append(mod)
         except Exception as e:
-            from memory.tagger import log_tagged_memory
-            quarantine_dir = PLUGINS_DIR.parent / "quarantine"
-            quarantine_dir.mkdir(exist_ok=True)
             quarantined_path = quarantine_dir / plugin_file.name
             try:
                 shutil.move(str(plugin_file), str(quarantined_path))
-                log_tagged_memory(f"Quarantined broken plugin {plugin_file.name}: {e}", topic="plugin", trust="low")
+                log_tagged_memory(
+                    f"Quarantined broken plugin {plugin_file.name}: {e}",
+                    topic="plugin",
+                    trust="low",
+                )
             except Exception as move_err:
-                log_tagged_memory(f"Failed to quarantine {plugin_file.name}: {move_err}", topic="plugin", trust="low")
+                log_tagged_memory(
+                    f"Failed to quarantine {plugin_file.name}: {move_err}",
+                    topic="plugin",
+                    trust="low",
+                )
     return plugins
 
 
