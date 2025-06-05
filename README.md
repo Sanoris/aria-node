@@ -64,6 +64,12 @@ python -m grpc_tools.protoc -I./proto --python_out=./proto --grpc_python_out=./p
 
 ---
 
+## License
+
+This project is released under the MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
 ## Disclaimer
 
 Aria-node is an experimental platform intended for research and prototyping.
