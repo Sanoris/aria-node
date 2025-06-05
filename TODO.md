@@ -35,7 +35,7 @@ Each section lists the file(s) involved and what's needed.
 
 - [ ]  Run `scripts/genDocs.py` to regenerate `docs/plugins.md`
 - [ ]  Add plugin replication explanation to `grpc_sync.md`
-- [ ]  Fix/remove broken `docs/memory_sync_quickref.md` link in `README.md`
+- [x]  Fix/remove broken `docs/memory_sync_quickref.md` link in `README.md`
 - [ ]  Clarify if/when to run `protoc` in README
 
 ---
