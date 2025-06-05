@@ -1,3 +1,8 @@
+"""Replicates the newest evolved plugin to a random online peer.
+
+Facilitates code propagation across the swarm. Can spread malicious or
+unstable plugins if not carefully monitored.
+"""
 
 import os
 import random

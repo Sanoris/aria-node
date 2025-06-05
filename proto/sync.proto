@@ -10,6 +10,7 @@ message MemoryEntry {
 message PluginPush {
   string filename = 1;
   string data_b64 = 2;
+  string signature = 3;
 }
 
 message SyncMemoryRequest {

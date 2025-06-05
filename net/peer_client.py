@@ -13,6 +13,7 @@ from memory.tagger import log_tagged_memory
 from trust.manager import initialize_peer_trust
 from plugins.analysis import analyze_peer_plugins
 import base64
+import yaml
 
 CURRENT_CYCLE_ID = 42
 
@@ -22,7 +23,26 @@ def load_active_plugins(directory="plugins"):
     except FileNotFoundError:
         return []
 
-def load_peers(catalog_path="host_catalog.json"):
+def load_peers(catalog_path="host_catalog.json", config_path="config.yaml"):
+    # Prefer peers listed in config.yaml
+    try:
+        with open(config_path, "r") as f:
+            cfg = yaml.safe_load(f)
+        sync_peers = cfg.get("sync_peers")
+        if sync_peers:
+            peers = []
+            for entry in sync_peers:
+                if ":" in entry:
+                    peers.append(entry)
+                else:
+                    peers.append(f"{entry}:50051")
+            return peers
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        print(f"[load_peers] Failed to read config: {e}")
+
+    # Fallback to host_catalog.json
     try:
         with open(catalog_path, "r") as f:
             hosts = json.load(f)
@@ -90,10 +110,11 @@ def sync_with_peer(peer_address, memory_payload=b"", signature=b"sync", plugin_p
                 plugin_bytes = open(plugin_path, "rb").read()
                 data_b64 = base64.b64encode(plugin_bytes).decode("utf-8")
                 plugin_signature = priv_key.sign(plugin_bytes)
+                sig_b64 = base64.b64encode(plugin_signature).decode("utf-8")
                 plugin_push = sync_pb2.PluginPush(
                     filename=os.path.basename(plugin_path),
                     data_b64=data_b64,
-                    signature=plugin_signature
+                    signature=sig_b64
                 )
 
             request = sync_pb2.SyncMemoryRequest(

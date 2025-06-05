@@ -1,3 +1,9 @@
+"""Synchronizes memory with the elected dashboard over gRPC.
+
+Periodically sends local memory state to the dashboard. Can leak
+sensitive data over the network and increases bandwidth usage.
+"""
+
 import socket
 import time
 import hashlib

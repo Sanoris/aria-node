@@ -1,3 +1,8 @@
+"""Publishes vote summaries and promotes approved actions.
+
+Can inadvertently promote malicious proposals if vote data is tampered.
+"""
+
 from memory.tagger import get_recent_memory, log_tagged_memory
 from net.swarm_vote import swarm_vote
 
@@ -9,6 +14,8 @@ TRIGGER = {
 def run():
     logs = get_recent_memory(limit=200)
     result = swarm_vote(logs, tag="decision")
+    if not result:
+        return
 
     summary = (
         f"[Vote Summary] YES={result['yes']} | NO={result['no']} | ABSTAIN={result['abstain']} | Net={result['net']}"

@@ -1,3 +1,8 @@
+"""Monitors the inference queue size and logs warnings when backlog grows.
+
+May generate many log entries under heavy load, filling memory quickly.
+"""
+
 import time
 from memory.tagger import log_tagged_memory
 from inference.inference_worker import InferenceWorker

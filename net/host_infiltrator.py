@@ -1,3 +1,6 @@
+"""DISCLAIMER: This module enables unauthorized deployment behavior and is
+provided solely for research use. Do not deploy it in real environments."""
+
 import json
 import time
 from net.transport_smb import try_smb_upload
