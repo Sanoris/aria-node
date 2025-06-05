@@ -150,6 +150,11 @@ python -m grpc_tools.protoc -I./proto --python_out=./proto --grpc_python_out=./p
 Aria-node is an experimental platform intended for research and prototyping.
 It is not a production system and carries inherent risks as an evolving distributed framework.
 
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
 Potential misuse includes:
 
 - Self-replication across peers.
