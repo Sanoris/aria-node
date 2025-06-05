@@ -2,7 +2,8 @@ from memory.tagger import get_recent_memory, log_tagged_memory
 from inference.inference_worker import InferenceWorker
 import hashlib
 from memory.vector_logger import log_vector_record
-from trust.manager import endorse_peer
+from trust.endorsement_chain import endorse_peer
+from crypto.identity import get_node_id
 
 TRIGGER = {
     "type": "scheduled",
@@ -26,7 +27,8 @@ def handle_result(prompt, output, vector):
             raw = prompt.split("Proposing decision:")[1].split(":")[0]
             proposer = raw.strip()
             if vote == "yes":
-                endorse_peer(proposer, reason=f"Auto-voted yes for: {prompt}")
+                endorser = get_node_id()
+                endorse_peer(proposer, endorser, 1.0, f"Auto-voted yes for: {prompt}")
         except Exception as e:
             log_tagged_memory(f"[vote_plugin] Could not parse proposer: {e}", topic="decision", trust="low")
 

@@ -5,6 +5,10 @@ from pathlib import Path
 from memory.tagger import log_tagged_memory, get_recent_memory
 import base64
 from cryptography.hazmat.primitives import serialization
+from memory.plugin_manifest import get_manifest
+from crypto.manifest_signer import verify_manifest
+from crypto.identity.keys import load_public_key
+import hashlib
 
 PLUGINS_DIR = Path("plugins")
 
@@ -16,9 +20,21 @@ def load_plugins():
     quarantine_dir.mkdir(exist_ok=True)
     for plugin_file in PLUGINS_DIR.glob("plugin_*.py"):
         try:
+            manifest = get_manifest()
+            code_bytes = plugin_file.read_bytes()
+            plugin_hash = hashlib.sha256(code_bytes).hexdigest()
+            meta = manifest.get(plugin_hash)
+            if not meta:
+                log_tagged_memory(f"Manifest missing for {plugin_file.name}", topic="plugin", trust="low")
+                continue
+            pub = load_public_key()
+            if not verify_manifest(meta, meta.get("author_signature", ""), pub):
+                raise ValueError("signature mismatch")
+
             spec = importlib.util.spec_from_file_location(plugin_file.stem, plugin_file)
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
+
 
             # verify run() exists
             if not hasattr(mod, "run") or not callable(getattr(mod, "run")):
@@ -56,6 +72,7 @@ def load_plugins():
             elif ttype == "event" and "match" not in trigger:
                 log_tagged_memory(
                     f"Malformed TRIGGER in {plugin_file.name}: missing 'match'",
+
                     topic="plugin",
                     trust="low",
                 )
@@ -65,6 +82,7 @@ def load_plugins():
             quarantined_path = quarantine_dir / plugin_file.name
             try:
                 shutil.move(str(plugin_file), str(quarantined_path))
+
                 log_tagged_memory(
                     f"Quarantined broken plugin {plugin_file.name}: {e}",
                     topic="plugin",
@@ -76,6 +94,7 @@ def load_plugins():
                     topic="plugin",
                     trust="low",
                 )
+
     return plugins
 
 
@@ -156,7 +175,8 @@ def receive_and_write_plugin(filename, data_b64, signature):
         )
         pub_key = Ed25519PublicKey.from_public_bytes(pub_bytes)
 
-        pub_key.verify(signature, code_bytes)  # throws if bad
+        signature_bytes = base64.b64decode(signature)
+        pub_key.verify(signature_bytes, code_bytes)  # throws if bad
 
         path = PLUGINS_DIR / filename
         path.write_text(code_bytes.decode("utf-8"), encoding="utf-8")
