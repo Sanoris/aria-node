@@ -47,6 +47,19 @@ pip install -r requirements.txt
 python node.py
 ```
 
+### Configuring Peers
+
+Peers can be specified in `config.yaml` using the `sync_peers` list:
+
+```yaml
+sync_peers:
+  - 10.5.0.2
+  - 10.5.0.3
+```
+
+If no peers are listed, the node falls back to `host_catalog.json` when
+discovering peers.
+
 ## Compiling Proto Definitions
 
 ```bash
