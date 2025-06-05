@@ -5,6 +5,10 @@ from pathlib import Path
 from memory.tagger import log_tagged_memory, get_recent_memory
 import base64
 from cryptography.hazmat.primitives import serialization
+from memory.plugin_manifest import get_manifest
+from crypto.manifest_signer import verify_manifest
+from crypto.identity.keys import load_public_key
+import hashlib
 
 PLUGINS_DIR = Path("plugins")
 
@@ -14,6 +18,17 @@ def load_plugins():
     plugins = []
     for plugin_file in PLUGINS_DIR.glob("plugin_*.py"):
         try:
+            manifest = get_manifest()
+            code_bytes = plugin_file.read_bytes()
+            plugin_hash = hashlib.sha256(code_bytes).hexdigest()
+            meta = manifest.get(plugin_hash)
+            if not meta:
+                log_tagged_memory(f"Manifest missing for {plugin_file.name}", topic="plugin", trust="low")
+                continue
+            pub = load_public_key()
+            if not verify_manifest(meta, meta.get("author_signature", ""), pub):
+                raise ValueError("signature mismatch")
+
             spec = importlib.util.spec_from_file_location(plugin_file.stem, plugin_file)
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
