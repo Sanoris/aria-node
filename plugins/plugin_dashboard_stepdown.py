@@ -1,3 +1,9 @@
+"""Steps down from dashboard role when another dashboard is detected.
+
+Stops Nginx and Uvicorn when relinquishing role. If misfired, it could
+shut down the local dashboard unexpectedly.
+"""
+
 import time
 import socket
 import subprocess

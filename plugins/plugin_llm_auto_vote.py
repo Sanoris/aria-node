@@ -1,3 +1,9 @@
+"""Uses an LLM to automatically vote on recent swarm decisions.
+
+LLM responses may be unpredictable and could endorse malicious actions
+if prompts are manipulated.
+"""
+
 from memory.tagger import get_recent_memory, log_tagged_memory
 from inference.inference_worker import InferenceWorker
 import hashlib

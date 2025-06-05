@@ -1,3 +1,9 @@
+"""Promotes this node to dashboard role if no dashboard is found.
+
+Starts web servers like Nginx and Uvicorn to host the dashboard.
+Running network services may expose the node or consume resources.
+"""
+
 import time
 import socket
 import subprocess

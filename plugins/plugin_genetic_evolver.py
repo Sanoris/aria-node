@@ -1,3 +1,8 @@
+"""Evolves existing plugins by randomly or LLM-assisted mutations.
+
+Creates new `plugin_evolved_*.py` files from crossover and mutation of
+other plugins. May execute arbitrary generated code, so use with care.
+"""
 
 import os
 import random
