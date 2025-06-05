@@ -15,10 +15,16 @@ def push_plugin_to_peer(plugin_path, target_ip, key_b64):
 
     with grpc.insecure_channel(f"{target_ip}:50051") as channel:
         stub = sync_pb2_grpc.AriaPeerStub(channel)
-        packet = sync_pb2.MemoryPacket(
+        plugin_push = sync_pb2.PluginPush(
+            filename=os.path.basename(plugin_path),
+            data_b64=base64.b64encode(raw).decode("utf-8"),
+            signature=""
+        )
+        request = sync_pb2.SyncMemoryRequest(
             sender_id="plugin_push",
             encrypted_memory=encrypted,
-            signature=b"plugin"
+            signature=b"plugin",
+            plugin_push=plugin_push
         )
-        response = stub.SyncMemory(packet)
+        response = stub.SyncMemory(request)
         print("[📡] Plugin pushed:", response.message)

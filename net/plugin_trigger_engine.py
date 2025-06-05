@@ -95,12 +95,13 @@ def run_plugins_by_trigger(trigger):
             except Exception as e:
                 print(f"[!] Plugin {trigger} failed: {e}")
 
-def receive_and_write_plugin(filename, data_b64, signature):
+def receive_and_write_plugin(filename, data_b64, signature_b64):
     try:
         from crypto import load_keys
         from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 
         code_bytes = base64.b64decode(data_b64)
+        signature = base64.b64decode(signature_b64)
         _, pub = load_keys()
         pub_bytes = pub.public_bytes(
             encoding=serialization.Encoding.Raw,
