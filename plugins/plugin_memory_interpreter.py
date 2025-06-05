@@ -1,3 +1,9 @@
+"""Uses an LLM to summarize recent memory and provide swarm insights.
+
+Could leak private data via prompts and may misinterpret context,
+leading to misleading analysis.
+"""
+
 import os
 import sys
 import signal
