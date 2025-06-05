@@ -68,3 +68,13 @@ python -m grpc_tools.protoc -I./proto --python_out=./proto --grpc_python_out=./p
 
 Aria-node is an experimental platform intended for research and prototyping.
 It is not a production system and carries inherent risks as an evolving distributed framework.
+
+Potential misuse includes:
+
+- Self-replication across peers.
+- Unauthorized scanning of networks.
+- Infiltration or other malicious actions.
+
+Run nodes only in controlled environments that you own and monitor. The authors assume no liability for damages resulting from misuse.
+
+🤝 🔗 🛡️ 💚 🧠 🌀 ✨ 🚀
