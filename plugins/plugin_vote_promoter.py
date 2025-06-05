@@ -14,6 +14,8 @@ TRIGGER = {
 def run():
     logs = get_recent_memory(limit=200)
     result = swarm_vote(logs, tag="decision")
+    if not result:
+        return
 
     summary = (
         f"[Vote Summary] YES={result['yes']} | NO={result['no']} | ABSTAIN={result['abstain']} | Net={result['net']}"
