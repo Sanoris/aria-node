@@ -5,6 +5,7 @@ from pathlib import Path
 from memory.tagger import log_tagged_memory, get_recent_memory
 import base64
 from cryptography.hazmat.primitives import serialization
+from crypto.identity.genome import verify_signature
 
 PLUGINS_DIR = Path("plugins")
 
@@ -14,20 +15,57 @@ def load_plugins():
     plugins = []
     for plugin_file in PLUGINS_DIR.glob("plugin_*.py"):
         try:
-            spec = importlib.util.spec_from_file_location(plugin_file.stem, plugin_file)
-            mod = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
-            plugins.append(mod)
-        except Exception as e:
-            from memory.tagger import log_tagged_memory
+            code = plugin_file.read_text(encoding="utf-8")
+        except Exception as read_err:
+            log_tagged_memory(
+                f"Failed to read plugin {plugin_file.name}: {read_err}",
+                topic="plugin",
+                trust="low",
+            )
+            continue
+
+        valid, info = verify_signature(code)
+        if not valid:
             quarantine_dir = PLUGINS_DIR.parent / "quarantine"
             quarantine_dir.mkdir(exist_ok=True)
             quarantined_path = quarantine_dir / plugin_file.name
             try:
                 shutil.move(str(plugin_file), str(quarantined_path))
-                log_tagged_memory(f"Quarantined broken plugin {plugin_file.name}: {e}", topic="plugin", trust="low")
+                log_tagged_memory(
+                    f"Quarantined plugin {plugin_file.name}: {info}",
+                    topic="plugin",
+                    trust="low",
+                )
             except Exception as move_err:
-                log_tagged_memory(f"Failed to quarantine {plugin_file.name}: {move_err}", topic="plugin", trust="low")
+                log_tagged_memory(
+                    f"Failed to quarantine {plugin_file.name}: {move_err}",
+                    topic="plugin",
+                    trust="low",
+                )
+            continue
+
+        try:
+            spec = importlib.util.spec_from_file_location(plugin_file.stem, plugin_file)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            plugins.append(mod)
+        except Exception as e:
+            quarantine_dir = PLUGINS_DIR.parent / "quarantine"
+            quarantine_dir.mkdir(exist_ok=True)
+            quarantined_path = quarantine_dir / plugin_file.name
+            try:
+                shutil.move(str(plugin_file), str(quarantined_path))
+                log_tagged_memory(
+                    f"Quarantined broken plugin {plugin_file.name}: {e}",
+                    topic="plugin",
+                    trust="low",
+                )
+            except Exception as move_err:
+                log_tagged_memory(
+                    f"Failed to quarantine {plugin_file.name}: {move_err}",
+                    topic="plugin",
+                    trust="low",
+                )
     return plugins
 
 

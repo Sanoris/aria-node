@@ -63,6 +63,10 @@ plugins = load_plugins()
 ### Safety:
 Each plugin execution is wrapped in `try/except` and logs to memory with `log_tagged_memory()`.
 
+### Signature Verification
+
+Before a plugin module is executed, its source code is read and validated with `crypto.identity.genome.verify_signature()`. If verification fails, the file is moved to `quarantine/` and skipped. The quarantine action is logged with `log_tagged_memory` under the `plugin` topic.
+
 ---
 
 ## 📡 Memory Matching
