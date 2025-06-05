@@ -89,6 +89,20 @@ pip install -r requirements.txt
 python node.py
 ```
 
+
+### Configuring Peers
+
+Peers can be specified in `config.yaml` using the `sync_peers` list:
+
+```yaml
+sync_peers:
+  - 10.5.0.2
+  - 10.5.0.3
+```
+
+If no peers are listed, the node falls back to `host_catalog.json` when
+discovering peers.
+
 ### Usage Examples
 
 - **Develop a plugin**
@@ -127,6 +141,7 @@ plugin activity.  By default the dashboard exposes:
 Nodes can promote themselves to dashboard role automatically via the provided
 plugins. Accessing `http://localhost:8001` will show the current peer status
 and log summary.
+
 
 ## Compiling Proto Definitions
 

@@ -13,6 +13,7 @@ from memory.tagger import log_tagged_memory
 from trust.manager import initialize_peer_trust
 from plugins.analysis import analyze_peer_plugins
 import base64
+import yaml
 
 CURRENT_CYCLE_ID = 42
 
@@ -22,7 +23,26 @@ def load_active_plugins(directory="plugins"):
     except FileNotFoundError:
         return []
 
-def load_peers(catalog_path="host_catalog.json"):
+def load_peers(catalog_path="host_catalog.json", config_path="config.yaml"):
+    # Prefer peers listed in config.yaml
+    try:
+        with open(config_path, "r") as f:
+            cfg = yaml.safe_load(f)
+        sync_peers = cfg.get("sync_peers")
+        if sync_peers:
+            peers = []
+            for entry in sync_peers:
+                if ":" in entry:
+                    peers.append(entry)
+                else:
+                    peers.append(f"{entry}:50051")
+            return peers
+    except FileNotFoundError:
+        pass
+    except Exception as e:
+        print(f"[load_peers] Failed to read config: {e}")
+
+    # Fallback to host_catalog.json
     try:
         with open(catalog_path, "r") as f:
             hosts = json.load(f)
