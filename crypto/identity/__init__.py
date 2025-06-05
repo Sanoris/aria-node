@@ -13,9 +13,11 @@ def get_node_id():
     return hashlib.sha256(raw).hexdigest()[:16]
 
 
+
 def sign_message(message: bytes) -> bytes:
     """Sign the given message using the node's private key."""
     if isinstance(message, str):
         message = message.encode("utf-8")
     private_key = load_keys()
     return private_key.sign(message)
+

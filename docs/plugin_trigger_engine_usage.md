@@ -60,8 +60,16 @@ Plugins are dynamically loaded from `plugins/` using `importlib`. Each plugin mu
 plugins = load_plugins()
 ```
 
+`load_plugins()` verifies that each plugin defines a callable `run()` function.
+Plugins missing `run()` are quarantined with a low-trust log entry. The `TRIGGER`
+structure is also checked and warnings are logged if fields are malformed.
+
 ### Safety:
 Each plugin execution is wrapped in `try/except` and logs to memory with `log_tagged_memory()`.
+
+### Signature Verification
+
+Before a plugin module is executed, its source code is read and validated with `crypto.identity.genome.verify_signature()`. If verification fails, the file is moved to `quarantine/` and skipped. The quarantine action is logged with `log_tagged_memory` under the `plugin` topic.
 
 ---
 
