@@ -35,17 +35,17 @@ Each section lists the file(s) involved and what's needed.
 
 - [ ]  Run `scripts/genDocs.py` to regenerate `docs/plugins.md`
 - [ ]  Add plugin replication explanation to `grpc_sync.md`
-- [ ]  Fix/remove broken `docs/memory_sync_quickref.md` link in `README.md`
+- [x]  Fix/remove broken `docs/memory_sync_quickref.md` link in `README.md`
 - [ ]  Clarify if/when to run `protoc` in README
 
 ---
 
 ## 🚀 5. Improve Plugin Consistency Checks
 
-- [ ]  Add logic to `plugin_trigger_engine.py`:
-  - [ ]  Warn if `run()` missing
-  - [ ]  Warn if malformed `TRIGGER`
-- [ ]  Print/log quarantine messages clearly
+- [x]  Add logic to `plugin_trigger_engine.py`:
+  - [x]  Warn if `run()` missing
+  - [x]  Warn if malformed `TRIGGER`
+- [x]  Print/log quarantine messages clearly
 
 ---
 

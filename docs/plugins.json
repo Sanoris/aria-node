@@ -1,14 +1,24 @@
 [
   {
     "name": "plugin_arp_watcher.py",
-    "description": "*No docstring provided.*",
+    "description": "Monitors ARP traffic to detect new devices and log them in a catalog.\n\nPassively captures network packets, which may reveal device information\nwithout consent.",
     "trigger": {
       "type": "passive"
     }
   },
   {
+    "name": "plugin_auto_vote.py",
+    "description": "Automatically votes on proposals found in recent memory entries.\n\nSimple heuristics may cast incorrect votes, influencing swarm decisions\nwithout human oversight.",
+    "trigger": {
+      "type": "event",
+      "match": {
+        "AAAAAAAAAAAAA": "AAAAAAAAAAAAA"
+      }
+    }
+  },
+  {
     "name": "plugin_dashboard_autopromote.py",
-    "description": "*No docstring provided.*",
+    "description": "Promotes this node to dashboard role if no dashboard is found.\n\nStarts web servers like Nginx and Uvicorn to host the dashboard.\nRunning network services may expose the node or consume resources.",
     "trigger": {
       "type": "event",
       "match": {
@@ -20,7 +30,7 @@
   },
   {
     "name": "plugin_dashboard_stepdown.py",
-    "description": "*No docstring provided.*",
+    "description": "Steps down from dashboard role when another dashboard is detected.\n\nStops Nginx and Uvicorn when relinquishing role. If misfired, it could\nshut down the local dashboard unexpectedly.",
     "trigger": {
       "type": "event",
       "match": {
@@ -31,20 +41,103 @@
   },
   {
     "name": "plugin_dashboard_sync.py",
-    "description": "*No docstring provided.*",
+    "description": "Synchronizes memory with the elected dashboard over gRPC.\n\nPeriodically sends local memory state to the dashboard. Can leak\nsensitive data over the network and increases bandwidth usage.",
     "trigger": {
       "type": "scheduled",
       "interval": 30
     }
   },
   {
+    "name": "plugin_genealogist.py",
+    "description": "Reports lineage information for evolved plugins by reading genome headers.\n\nUseful for tracing plugin origins but may reveal details about mutations\nor source nodes if leaked.",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 900
+    }
+  },
+  {
     "name": "plugin_genetic_evolver.py",
-    "description": "plugin_genetic_evolver.py",
-    "trigger": null
+    "description": "Evolves existing plugins by randomly or LLM-assisted mutations.\n\nCreates new `plugin_evolved_*.py` files from crossover and mutation of\nother plugins. May execute arbitrary generated code, so use with care.",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 900
+    }
+  },
+  {
+    "name": "plugin_inference_latency.py",
+    "description": "Logs average inference latency from recent inference worker statistics.\n\nHelps detect slowdown but continuously reading stats may affect\nperformance slightly.",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 120
+    }
+  },
+  {
+    "name": "plugin_inference_monitor.py",
+    "description": "Monitors the inference queue size and logs warnings when backlog grows.\n\nMay generate many log entries under heavy load, filling memory quickly.",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 60
+    }
+  },
+  {
+    "name": "plugin_instincts.py",
+    "description": "Executes instinctive behaviors based on recent memory patterns.\n\nCan trigger scanning or replication plugins automatically, which may be\nintrusive or resource intensive.",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 300
+    }
   },
   {
     "name": "plugin_lan_scanner.py",
-    "description": "*No docstring provided.*",
+    "description": "Scans the local network for peers and open ports, updating host catalog.\n\nUseful for discovery but aggressive scanning could alert network monitors\nor violate policies.",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 300
+    }
+  },
+  {
+    "name": "plugin_llm_auto_vote.py",
+    "description": "Uses an LLM to automatically vote on recent swarm decisions.\n\nLLM responses may be unpredictable and could endorse malicious actions\nif prompts are manipulated.",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 120
+    }
+  },
+  {
+    "name": "plugin_llm_scheduler.py",
+    "description": "Asks an LLM to recommend scheduling or disabling plugins.\n\nRelies on AI judgments which may be poor or biased, potentially causing\nharmful plugin behavior changes.",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 300
+    }
+  },
+  {
+    "name": "plugin_memory_interpreter.py",
+    "description": "Uses an LLM to summarize recent memory and provide swarm insights.\n\nCould leak private data via prompts and may misinterpret context,\nleading to misleading analysis.",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 30
+    }
+  },
+  {
+    "name": "plugin_peer_quarantine.py",
+    "description": "Removes peers from the catalog that repeatedly fail handshakes.\n\nHelps prune unreachable nodes but might accidentally quarantine healthy\npeers if network issues are temporary.",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 600
+    }
+  },
+  {
+    "name": "plugin_pruner.py",
+    "description": "Deletes evolved plugins that show poor performance or inactivity.\n\nHelps control plugin sprawl but could remove useful plugins if criteria\nare too aggressive.",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 600
+    }
+  },
+  {
+    "name": "plugin_replicator.py",
+    "description": "Replicates the newest evolved plugin to a random online peer.\n\nFacilitates code propagation across the swarm. Can spread malicious or\nunstable plugins if not carefully monitored.",
     "trigger": {
       "type": "scheduled",
       "interval": 300
@@ -52,7 +145,7 @@
   },
   {
     "name": "plugin_smb_replicator.py",
-    "description": "*No docstring provided.*",
+    "description": "Copies the node executable to writable SMB or removable drives.\n\nEnables spreading to Windows shares and may hide the payload. This is\novert malware-like behavior and is high risk.",
     "trigger": {
       "type": "event",
       "match": {
@@ -63,13 +156,36 @@
   },
   {
     "name": "plugin_update_proxy.py",
-    "description": "*No docstring provided.*",
+    "description": "Updates the nginx proxy configuration when a new dashboard is elected.\n\nReads memory logs to find the latest dashboard IP and rewrites config.\nImproper configuration could break access or expose the node.",
     "trigger": {
       "type": "event",
       "match": {
         "topic": "role",
         "role": "dashboard"
       }
+    }
+  },
+  {
+    "name": "plugin_vote_aggregator.py",
+    "description": "Aggregates swarm votes from memory and logs a summary.\n\nPurely informational but could be misleading if memory contains spam or\nmanipulated votes.",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 300
+    }
+  },
+  {
+    "name": "plugin_vote_promoter.py",
+    "description": "Publishes vote summaries and promotes approved actions.\n\nCan inadvertently promote malicious proposals if vote data is tampered.",
+    "trigger": {
+      "type": "scheduled",
+      "interval": 300
+    }
+  },
+  {
+    "name": "plugin_ws_sadl_sniffer.py",
+    "description": "Intercepts WebSocket traffic using NFQUEUE or scapy and logs packets.\n\nCan capture sensitive data and requires elevated privileges on Linux.",
+    "trigger": {
+      "type": "manual"
     }
   }
 ]

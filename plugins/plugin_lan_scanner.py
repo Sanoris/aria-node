@@ -1,3 +1,9 @@
+"""Scans the local network for peers and open ports, updating host catalog.
+
+Useful for discovery but aggressive scanning could alert network monitors
+or violate policies.
+"""
+
 import socket
 import ipaddress
 import json
