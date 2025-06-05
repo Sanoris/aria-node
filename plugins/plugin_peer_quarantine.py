@@ -1,3 +1,8 @@
+"""Removes peers from the catalog that repeatedly fail handshakes.
+
+Helps prune unreachable nodes but might accidentally quarantine healthy
+peers if network issues are temporary.
+"""
 
 import json
 from memory.tagger import get_recent_memory, log_tagged_memory

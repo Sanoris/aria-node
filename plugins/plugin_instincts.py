@@ -1,3 +1,8 @@
+"""Executes instinctive behaviors based on recent memory patterns.
+
+Can trigger scanning or replication plugins automatically, which may be
+intrusive or resource intensive.
+"""
 
 from memory.tagger import get_recent_memory, log_tagged_memory
 from net.plugin_trigger_engine import run_plugins_by_trigger

@@ -1,3 +1,4 @@
+
 # 📝 Memory Sync Quick Reference
 
 This guide provides the essential commands and file locations used by Aria-node's memory synchronization features. For a more detailed explanation see [Memory Sync Architecture](grpc_sync.md).
@@ -8,11 +9,13 @@ This guide provides the essential commands and file locations used by Aria-node'
 
 Use `memory/tagger.py` to write timestamped events to `memory/log.txt`:
 
+
 ```python
 from memory.tagger import log_tagged_memory
 
 log_tagged_memory("Peer handshake succeeded", topic="peer", trust="neutral")
 ```
+
 
 Entries are stored in JSON format and can be inspected directly in `memory/log.txt`.
 
@@ -39,4 +42,5 @@ This sends the last 20 log entries over gRPC to the specified peer.
 | `proto/sync.proto` | gRPC request/response definitions |
 
 These components work together to keep nodes in sync.
+
 

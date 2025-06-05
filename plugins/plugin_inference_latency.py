@@ -1,3 +1,9 @@
+"""Logs average inference latency from recent inference worker statistics.
+
+Helps detect slowdown but continuously reading stats may affect
+performance slightly.
+"""
+
 import time
 import json
 from statistics import mean

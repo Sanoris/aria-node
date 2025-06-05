@@ -1,3 +1,9 @@
+"""Monitors ARP traffic to detect new devices and log them in a catalog.
+
+Passively captures network packets, which may reveal device information
+without consent.
+"""
+
 from scapy.all import sniff, ARP
 from memory.tagger import log_tagged_memory
 import threading

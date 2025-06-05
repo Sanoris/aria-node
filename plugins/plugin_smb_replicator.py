@@ -1,3 +1,15 @@
+
+"""DISCLAIMER: This plugin replicates the node via SMB shares.
+It enables unauthorized deployment behavior and is provided
+for research use only.
+
+Copies the node executable to writable SMB or removable drives.
+
+Enables spreading to Windows shares and may hide the payload. This is
+overt malware-like behavior and is high risk.
+"""
+
+
 import os
 import shutil
 import time
