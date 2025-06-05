@@ -5,6 +5,12 @@ import subprocess
 from pathlib import Path
 from memory.tagger import log_tagged_memory
 from inference.inference_worker import InferenceWorker
+from crypto.identity import get_node_id
+from crypto.identity.keys import load_keys
+from crypto.manifest_signer import sign_manifest
+from memory.plugin_manifest import record_plugin
+import hashlib
+import json
 
 
 TRIGGER = {
@@ -103,6 +109,18 @@ def evolve_plugins():
     count = len([f for f in plugin_dir.glob("plugin_evolved_*.py")])
     new_path = plugin_dir / f"plugin_evolved_{count+1}.py"
     new_path.write_text(new_code, encoding="utf-8")
+
+    code_bytes = new_code.encode("utf-8")
+    plugin_hash = hashlib.sha256(code_bytes).hexdigest()
+    metadata = {
+        "author_node": get_node_id(),
+        "plugin_hash": plugin_hash,
+    }
+    metadata["metadata_hash"] = hashlib.sha256(json.dumps(metadata, sort_keys=True).encode()).hexdigest()
+    priv_key = load_keys()
+    metadata["author_signature"] = sign_manifest(metadata, priv_key)
+    record_plugin(plugin_hash, metadata)
+
     log_tagged_memory(f"Evolved new plugin: {new_path.name}", topic="plugin", trust="high")
 
 def run():

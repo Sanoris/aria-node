@@ -5,6 +5,10 @@ from pathlib import Path
 from memory.tagger import log_tagged_memory, get_recent_memory
 import base64
 from cryptography.hazmat.primitives import serialization
+from memory.plugin_manifest import get_manifest
+from crypto.manifest_signer import verify_manifest
+from crypto.identity.keys import load_public_key
+import hashlib
 
 PLUGINS_DIR = Path("plugins")
 
@@ -14,9 +18,38 @@ def load_plugins():
     plugins = []
     for plugin_file in PLUGINS_DIR.glob("plugin_*.py"):
         try:
+            manifest = get_manifest()
+            code_bytes = plugin_file.read_bytes()
+            plugin_hash = hashlib.sha256(code_bytes).hexdigest()
+            meta = manifest.get(plugin_hash)
+            if not meta:
+                log_tagged_memory(f"Manifest missing for {plugin_file.name}", topic="plugin", trust="low")
+                continue
+            pub = load_public_key()
+            if not verify_manifest(meta, meta.get("author_signature", ""), pub):
+                raise ValueError("signature mismatch")
+
             spec = importlib.util.spec_from_file_location(plugin_file.stem, plugin_file)
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
+
+            # warn if run() missing
+            if not hasattr(mod, "run") or not callable(getattr(mod, "run")):
+                log_tagged_memory(
+                    f"Plugin {plugin_file.name} missing run()",
+                    topic="plugin",
+                    trust="low",
+                )
+
+            # warn if malformed TRIGGER
+            trigger = getattr(mod, "TRIGGER", None)
+            if not isinstance(trigger, dict) or "type" not in trigger:
+                log_tagged_memory(
+                    f"Plugin {plugin_file.name} has malformed TRIGGER",
+                    topic="plugin",
+                    trust="low",
+                )
+
             plugins.append(mod)
         except Exception as e:
             from memory.tagger import log_tagged_memory
@@ -25,9 +58,13 @@ def load_plugins():
             quarantined_path = quarantine_dir / plugin_file.name
             try:
                 shutil.move(str(plugin_file), str(quarantined_path))
-                log_tagged_memory(f"Quarantined broken plugin {plugin_file.name}: {e}", topic="plugin", trust="low")
+                msg = f"Quarantined broken plugin {plugin_file.name}: {e}"
+                log_tagged_memory(msg, topic="plugin", trust="low")
+                print(msg)
             except Exception as move_err:
-                log_tagged_memory(f"Failed to quarantine {plugin_file.name}: {move_err}", topic="plugin", trust="low")
+                msg = f"Failed to quarantine {plugin_file.name}: {move_err}"
+                log_tagged_memory(msg, topic="plugin", trust="low")
+                print(msg)
     return plugins
 
 
