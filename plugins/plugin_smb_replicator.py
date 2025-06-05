@@ -1,3 +1,7 @@
+"""DISCLAIMER: This plugin replicates the node via SMB shares.
+It enables unauthorized deployment behavior and is provided
+for research use only."""
+
 import os
 import shutil
 import time

@@ -1,3 +1,6 @@
+"""DISCLAIMER: This dropper facilitates unauthorized deployment and
+self-deletion. It is provided solely for research purposes."""
+
 import os
 import time
 import shutil
