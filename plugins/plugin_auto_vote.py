@@ -1,3 +1,9 @@
+"""Automatically votes on proposals found in recent memory entries.
+
+Simple heuristics may cast incorrect votes, influencing swarm decisions
+without human oversight.
+"""
+
 from memory.tagger import get_recent_memory, log_tagged_memory
 
 TRIGGER = {

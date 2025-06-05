@@ -1,3 +1,7 @@
+"""Intercepts WebSocket traffic using NFQUEUE or scapy and logs packets.
+
+Can capture sensitive data and requires elevated privileges on Linux.
+"""
 # GENOME:
 # origin=plugin_ws_sadl_sniffer
 # generation=1

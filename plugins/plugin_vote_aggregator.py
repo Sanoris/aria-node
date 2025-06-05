@@ -1,3 +1,9 @@
+"""Aggregates swarm votes from memory and logs a summary.
+
+Purely informational but could be misleading if memory contains spam or
+manipulated votes.
+"""
+
 from memory.tagger import get_recent_memory, log_tagged_memory
 from net.swarm_vote import swarm_vote
 

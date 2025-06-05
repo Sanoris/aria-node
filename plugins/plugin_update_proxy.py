@@ -1,3 +1,9 @@
+"""Updates the nginx proxy configuration when a new dashboard is elected.
+
+Reads memory logs to find the latest dashboard IP and rewrites config.
+Improper configuration could break access or expose the node.
+"""
+
 import json
 import os
 import time

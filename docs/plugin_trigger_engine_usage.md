@@ -60,6 +60,10 @@ Plugins are dynamically loaded from `plugins/` using `importlib`. Each plugin mu
 plugins = load_plugins()
 ```
 
+`load_plugins()` verifies that each plugin defines a callable `run()` function.
+Plugins missing `run()` are quarantined with a low-trust log entry. The `TRIGGER`
+structure is also checked and warnings are logged if fields are malformed.
+
 ### Safety:
 Each plugin execution is wrapped in `try/except` and logs to memory with `log_tagged_memory()`.
 

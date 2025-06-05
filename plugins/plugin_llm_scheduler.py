@@ -1,3 +1,9 @@
+"""Asks an LLM to recommend scheduling or disabling plugins.
+
+Relies on AI judgments which may be poor or biased, potentially causing
+harmful plugin behavior changes.
+"""
+
 from memory.tagger import get_recent_memory, log_tagged_memory
 from inference.inference_worker import InferenceWorker
 import hashlib
