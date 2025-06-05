@@ -2,7 +2,7 @@ import grpc
 import sys, os, yaml, socket
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'proto'))
-from crypto.crypto import encrypt_message, load_key_from_file
+from crypto.crypto_utils import encrypt_message, load_key_from_file
 from crypto.identity import sign_message
 import proto.sync_pb2 as sync_pb2
 import proto.sync_pb2_grpc as sync_pb2_grpc
