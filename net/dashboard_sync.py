@@ -43,7 +43,7 @@ def sync_to_dashboard(ip: str, memory_entries: list):
 
         with grpc.insecure_channel(dashboard_address) as channel:
             stub = sync_pb2_grpc.AriaPeerStub(channel)
-            stub.SendToDashboard(sync_pb2.DashboardSyncRequest(
+            response = stub.SendToDashboard(sync_pb2.DashboardSyncRequest(
                 sender_id=node_id,
                 entries=[
                     sync_pb2.MemoryEntry(
@@ -52,6 +52,11 @@ def sync_to_dashboard(ip: str, memory_entries: list):
                         timestamp=e.get("timestamp", datetime.now().isoformat())
                     ) for e in memory_entries
                 ]
-            ))#asdf
+            ))
+            log_tagged_memory(
+                f"Dashboard sync: {response.message}",
+                topic="dashboard",
+                trust="high",
+            )
     except Exception as e:
         log_tagged_memory(f"Failed to sync to dashboard: {e}", topic="dashboard", trust="low")
