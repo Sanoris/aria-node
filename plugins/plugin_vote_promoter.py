@@ -1,3 +1,8 @@
+"""Publishes vote summaries and promotes approved actions.
+
+Can inadvertently promote malicious proposals if vote data is tampered.
+"""
+
 from memory.tagger import get_recent_memory, log_tagged_memory
 from net.swarm_vote import swarm_vote
 

@@ -1,3 +1,8 @@
+"""Reports lineage information for evolved plugins by reading genome headers.
+
+Useful for tracing plugin origins but may reveal details about mutations
+or source nodes if leaked.
+"""
 
 import os
 import json

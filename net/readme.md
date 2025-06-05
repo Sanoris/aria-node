@@ -1,5 +1,7 @@
 # net
 
+**DISCLAIMER: The networking utilities in this directory include code that enables unauthorized deployment behavior. They are provided strictly for research use only.**
+
 This directory forms the networking backbone of Aria-node. It includes peer synchronization, plugin propagation, dashboard transmission, swarm coordination, and payload deployment.
 
 ### Components

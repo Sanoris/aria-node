@@ -1,3 +1,8 @@
+"""Deletes evolved plugins that show poor performance or inactivity.
+
+Helps control plugin sprawl but could remove useful plugins if criteria
+are too aggressive.
+"""
 
 import os
 import time
