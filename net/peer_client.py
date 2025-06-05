@@ -90,10 +90,11 @@ def sync_with_peer(peer_address, memory_payload=b"", signature=b"sync", plugin_p
                 plugin_bytes = open(plugin_path, "rb").read()
                 data_b64 = base64.b64encode(plugin_bytes).decode("utf-8")
                 plugin_signature = priv_key.sign(plugin_bytes)
+                sig_b64 = base64.b64encode(plugin_signature).decode("utf-8")
                 plugin_push = sync_pb2.PluginPush(
                     filename=os.path.basename(plugin_path),
                     data_b64=data_b64,
-                    signature=plugin_signature
+                    signature=sig_b64
                 )
 
             request = sync_pb2.SyncMemoryRequest(

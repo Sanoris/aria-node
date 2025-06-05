@@ -25,6 +25,7 @@ class AriaPeerServicer(sync_pb2_grpc.AriaPeerServicer):
                 request.plugin_push.filename,
                 request.plugin_push.data_b64,
                 request.plugin_push.signature.encode("utf-8") if isinstance(request.plugin_push.signature, str) else request.plugin_push.signature
+
             )
     
         return sync_pb2.SyncMemoryResponse(
