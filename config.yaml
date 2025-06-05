@@ -14,6 +14,7 @@ log_level: INFO
 
 # Plugin controls
 plugin_enabled: true
+plugin_sandbox_enabled: false
 plugin_whitelist:
   - plugin_lan_scanner
   - plugin_dashboard_sync

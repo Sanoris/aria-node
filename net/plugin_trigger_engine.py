@@ -14,13 +14,23 @@ from memory.plugin_manifest import get_manifest                         # manife
 from crypto.manifest_signer import verify_manifest                      # manifest sigs
 from crypto.identity.keys import load_public_key                        # pk for manifest
 from cryptography.hazmat.primitives import serialization
+import yaml
+from utils.plugin_sandbox import run_in_sandbox
 
 # -----------------------------------------------------------------------------
 
 
 PLUGINS_DIR = Path("plugins")
+
+CONFIG_PATH = "config.yaml"
+
+def load_config():
+    with open(CONFIG_PATH, "r") as f:
+        return yaml.safe_load(f)
+
 QUARANTINE_DIR = PLUGINS_DIR.parent / "quarantine"
 QUARANTINE_DIR.mkdir(exist_ok=True)
+
 
 
 def _quarantine(plugin_path: Path, reason: str):
@@ -108,16 +118,25 @@ def load_plugins():
     return plugins
 
 
+
+def scheduled_runner(plugin, interval, sandbox=False):
+
 # -----------------------------------------------------------------------------
 # Trigger runners
 # -----------------------------------------------------------------------------
-def scheduled_runner(plugin, interval):
+
     while True:
         try:
-            plugin.run()
+            if sandbox:
+                run_in_sandbox(plugin.__file__, env_vars={}, work_dir=str(PLUGINS_DIR))
+            else:
+                plugin.run()
         except Exception as e:
-            log_tagged_memory(f"Error in plugin {plugin.__name__}: {e}",
-                              topic="plugin", trust="low")
+
+            log_tagged_memory(
+                f"Error in plugin {plugin.__name__}: {e}", topic="plugin", trust="low"
+            )
+
         time.sleep(interval)
 
 
@@ -150,6 +169,9 @@ def event_watcher(plugin, match_dict):
 # Main control functions
 # -----------------------------------------------------------------------------
 def start_plugins():
+    config = load_config()
+    sandbox_enabled = config.get("plugin_sandbox_enabled", False)
+
     plugins = load_plugins()
     for plugin in plugins:
         trigger = getattr(plugin, "TRIGGER", {})
@@ -157,26 +179,38 @@ def start_plugins():
         interval = trigger.get("interval", 300)
 
         if ttype == "scheduled":
-            threading.Thread(target=scheduled_runner, args=(plugin, interval),
-                             daemon=True).start()
-            log_tagged_memory(f"Started scheduled plugin {plugin.__name__}",
-                              topic="plugin", trust="high")
 
+            t = threading.Thread(
+                target=scheduled_runner,
+                args=(plugin, interval, sandbox_enabled),
+                daemon=True,
+            )
+            t.start()
+            log_tagged_memory(
+                f"Started scheduled plugin {plugin.__name__}", topic="plugin", trust="high"
+            )
         elif ttype == "passive":
             try:
-                plugin.run()
-                log_tagged_memory(f"Started passive plugin {plugin.__name__}",
-                                  topic="plugin", trust="high")
+                if sandbox_enabled:
+                    run_in_sandbox(plugin.__file__, env_vars={}, work_dir=str(PLUGINS_DIR), wait=False)
+                else:
+                    plugin.run()
+                log_tagged_memory(
+                    f"Started passive plugin {plugin.__name__}", topic="plugin", trust="high"
+                )
             except Exception as e:
-                log_tagged_memory(f"Passive plugin {plugin.__name__} error: {e}",
-                                  topic="plugin", trust="low")
-
+                log_tagged_memory(
+                    f"Passive plugin {plugin.__name__} error: {e}", topic="plugin", trust="low"
+                )
         elif ttype == "event":
             match_dict = trigger.get("match", {})
-            threading.Thread(target=event_watcher, args=(plugin, match_dict),
-                             daemon=True).start()
-            log_tagged_memory(f"Started event plugin {plugin.__name__} (match={match_dict})",
-                              topic="plugin", trust="high")
+            t = threading.Thread(target=event_watcher, args=(plugin, match_dict), daemon=True)
+            t.start()
+            log_tagged_memory(
+                f"Started event plugin {plugin.__name__} (watching for match: {match_dict})",
+                topic="plugin",
+                trust="high",
+            )
 
 
 def run_plugins_by_trigger(trigger_name):
